@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AUREX | Relics & Totems</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0429, #1a0033, #2a0044);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 1rem 2rem;
+    }
+
+    header h1 {
+      font-size: 4.5rem;
+      background: linear-gradient(90deg, #ff00cc, #00ffff, #ffd700, #ff00cc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+    }
+
+    .subtitle {
+      font-size: 1.4rem;
+      color: #a0ffcc;
+      letter-spacing: 3px;
+      margin-top: 10px;
+    }
+
+    /* Navigation */
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      background: rgba(0,0,0,0.3);
+      flex-wrap: wrap;
+    }
+
+    .nav-btn, .sub-btn {
+      padding: 12px 35px;
+      font-size: 1.1rem;
+      background: transparent;
+      color: #fff;
+      border: 2px solid #ff00ff;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .nav-btn.active, .sub-btn.active {
+      background: #ff00ff;
+      color: #000;
+      box-shadow: 0 0 20px #ff00ff;
+    }
+
+    /* Legendary Banner */
+    .legendary-banner {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(90deg, #ffd700, #ffaa00);
+      color: #000;
+      font-weight: bold;
+      font-size: 1.6rem;
+      margin: 20px auto;
+      max-width: 900px;
+      border-radius: 15px;
+    }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 30px 5%;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .nft-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .nft-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 25px 40px rgba(138, 43, 226, 0.5);
+    }
+
+    .nft-card img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+    }
+
+    .info {
+      padding: 18px;
+      text-align: center;
+    }
+
+    .info h3 {
+      color: #ffd700;
+      margin-bottom: 8px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1a0033;
+      max-width: 700px;
+      width: 90%;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid #ff00ff;
+    }
+
+    .modal-content img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .modal-info {
+      padding: 25px;
+      text-align: center;
+    }
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      font-size: 40px;
+      cursor: pointer;
+      color: #ff00ff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AUREX</h1>
+    <p class="subtitle">Relics & Totems Collection</p>
+  </header>
+
+  <!-- Main Navigation -->
+  <nav class="nav">
+    <button class="nav-btn active" data-section="relics">RELICS</button>
+    <button class="nav-btn" data-section="totems">TOTEMS</button>
+  </nav>
+
+  <!-- Relics Section -->
+  <div id="relics-section" class="section active">
+    <div class="legendary-banner">
+      <h2>ALL RELICS ARE LEGENDARY</h2>
+    </div>
+    <div class="gallery" id="relics-gallery"></div>
+  </div>
+
+  <!-- Totems Section -->
+  <div id="totems-section" class="section">
+    <div style="text-align:center; padding:20px;">
+      <button class="sub-btn active" data-type="best">BEST</button>
+      <button class="sub-btn" data-type="legendary">LEGENDARY</button>
+    </div>
+    <div class="gallery" id="totems-gallery"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <img id="modalImage" src="" alt="">
+      <div class="modal-info">
+        <h2 id="modalTitle"></h2>
+        <p id="modalDesc"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample Data - Apni images aur details yaha change kar dena
+    const relics = [
+      { id:1, title:"Ancient Sun Relic", img:"nfts/relic1.jpg", desc:"Legendary relic of the forgotten sun" },
+      { id:2, title:"Void Crystal Relic", img:"nfts/relic2.jpg", desc:"Holds the power of infinite darkness" },
+      { id:3, title:"Eternal Flame Relic", img:"nfts/relic3.jpg", desc:"Burns for a thousand lifetimes" },
+    ];
+
+    const totemsBest = [
+      { id:1, title:"Best Totem - Wolf Spirit", img:"nfts/totem1.jpg", desc:"Guardian of the wild" },
+      { id:2, title:"Best Totem - Eagle Eye", img:"nfts/totem2.jpg", desc:"Sees beyond the horizon" },
+    ];
+
+    const totemsLegendary = [
+      { id:1, title:"Dragon King Totem", img:"nfts/totem3.jpg", desc:"The supreme legendary totem" },
+      { id:2, title:"Phoenix Rebirth", img:"nfts/totem4.jpg", desc:"Rises from eternal flames" },
+    ];
+
+    // Render Functions
+    function renderGallery(galleryId, items) {
+      const gallery = document.getElementById(galleryId);
+      gallery.innerHTML = '';
+      
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'nft-card';
+        card.innerHTML = `
+          <img src="${item.img}" alt="${item.title}">
+          <div class="info">
+            <h3>${item.title}</h3>
+            <p>${item.desc}</p>
+          </div>
+        `;
+        card.onclick = () => showModal(item);
+        gallery.appendChild(card);
+      });
+    }
+
+    function showModal(item) {
+      document.getElementById('modalImage').src = item.img;
+      document.getElementById('modalTitle').textContent = item.title;
+      document.getElementById('modalDesc').textContent = item.desc;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    // Tab Switching
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(btn.dataset.section + '-section').classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.sub-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const type = btn.dataset.type;
+        const gallery = document.getElementById('totems-gallery');
+        
+        if (type === 'best') renderGallery('totems-gallery', totemsBest);
+        else renderGallery('totems-gallery', totemsLegendary);
+      });
+    });
+
+    // Close Modal
+    document.querySelector('.close').addEventListener('click', () => {
+      document.getElementById('modal').style.display = 'none';
+    });
+
+    // Initial Render
+    renderGallery('relics-gallery', relics);
+    renderGallery('totems-gallery', totemsBest);
+  </script>
+</body>
+</html>
