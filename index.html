@@ -733,19 +733,29 @@
     }
 
     // REMOVE FROM STORAGE ALSO
-    const imagePath =
-      nft.img.split("/storage/v1/object/public/nfts/")[1];
 
-    if(imagePath){
+const imagePath =
+  decodeURIComponent(
+    nft.img.split("/nfts/")[1]
+  );
 
-      await supabaseClient
-      .storage
-      .from("nfts")
-      .remove([imagePath]);
+console.log("Deleting Storage Path:", imagePath);
 
-    }
+if(imagePath){
 
-    alert("NFT Deleted Permanently");
+  const { error:storageError } =
+    await supabaseClient
+    .storage
+    .from("nfts")
+    .remove([imagePath]);
+
+  if(storageError){
+
+    console.log(storageError);
+
+  }
+
+}
 
     // RELOAD
     await loadNFTs();
