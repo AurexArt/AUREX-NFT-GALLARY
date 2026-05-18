@@ -23,17 +23,27 @@
       color: #ff00ff;
       text-shadow: 0 0 30px #ff00ff;
     }
-    .login-btn {
+    .header-buttons {
       position: absolute;
       top: 30px;
       right: 30px;
+      display: flex;
+      gap: 12px;
+    }
+    button {
       padding: 12px 28px;
       background: transparent;
       color: #00ffff;
       border: 2px solid #00ffff;
       border-radius: 50px;
       cursor: pointer;
+      font-weight: bold;
     }
+    button:hover {
+      background: #00ffff;
+      color: black;
+    }
+
     .nav {
       display: flex;
       justify-content: center;
@@ -88,15 +98,7 @@
       object-fit: cover;
     }
 
-    #upload-section {
-      display: none;
-      text-align: center;
-      padding: 30px;
-      background: #2a004d;
-      margin: 20px 5%;
-      border-radius: 15px;
-    }
-
+    /* Upload Modal */
     .modal {
       display: none;
       position: fixed;
@@ -107,13 +109,22 @@
       align-items: center;
       justify-content: center;
     }
-    .close {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      font-size: 45px;
-      color: #ff00ff;
-      cursor: pointer;
+    .modal-content {
+      background: #1a0033;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      border: 2px solid #ff00ff;
+    }
+    .modal-content input, .modal-content select, .modal-content textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background: #2a004d;
+      border: none;
+      color: white;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -121,7 +132,10 @@
 
   <header>
     <h1>AUREX</h1>
-    <button class="login-btn" id="loginBtn">LOGIN</button>
+    <div class="header-buttons">
+      <button id="loginBtn">LOGIN</button>
+      <button id="uploadBtn" style="display: none;">UPLOAD NFT</button>
+    </div>
   </header>
 
   <nav class="nav">
@@ -144,19 +158,34 @@
     <div class="gallery" id="totems-gallery"></div>
   </div>
 
-  <!-- Upload Section -->
-  <div id="upload-section">
-    <h2>Upload New NFT</h2>
-    <input type="file" id="imageUpload" accept="image/*"><br><br>
-    <select id="nftType">
-      <option value="relics">Relics</option>
-      <option value="totems-best">Totems - Best</option>
-      <option value="totems-legendary">Totems - Legendary</option>
-    </select><br><br>
-    <button onclick="uploadImage()">Upload Image</button>
+  <!-- Upload Modal -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-content">
+      <h2 style="text-align:center; color:#ff00ff;">Upload New NFT</h2>
+      
+      <input type="text" id="nftName" placeholder="NFT Name">
+      <textarea id="nftDesc" rows="3" placeholder="Description"></textarea>
+      
+      <select id="nftSection">
+        <option value="relics">Relics</option>
+        <option value="totems">Totems</option>
+      </select>
+      
+      <select id="totemType" style="display:none;">
+        <option value="best">Best</option>
+        <option value="legendary">Legendary</option>
+      </select>
+
+      <input type="file" id="imageUpload" accept="image/*" multiple>
+
+      <div style="margin-top:20px; text-align:center;">
+        <button onclick="uploadNFTs()" style="background:#ff00ff; color:black; padding:14px 40px;">UPLOAD</button>
+        <button onclick="closeUploadModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Preview Modal -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <span class="close">×</span>
@@ -169,7 +198,7 @@
   </div>
 
   <script>
-    // ================== DATA ==================
+    // Data
     const relicsData = [
       { title: "Ancient Sun Relic", img: "https://picsum.photos/id/1015/800/600", desc: "Eternal power of the sun" },
       { title: "Void Crystal Relic", img: "https://picsum.photos/id/201/800/600", desc: "Holds infinite darkness" }
@@ -185,7 +214,6 @@
       { title: "Dragon King", img: "https://picsum.photos/id/1016/800/600", desc: "Supreme legendary totem" }
     ];
 
-    // Render Gallery
     function renderGallery(containerId, data) {
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -211,25 +239,64 @@
       document.getElementById('modal').style.display = "flex";
     }
 
-    // Login
+    // Login + Upload Button Show
+    let isLoggedIn = false;
     document.getElementById('loginBtn').addEventListener('click', () => {
+      if (isLoggedIn) {
+        isLoggedIn = false;
+        document.getElementById('loginBtn').textContent = "LOGIN";
+        document.getElementById('uploadBtn').style.display = "none";
+        return;
+      }
+
       const email = prompt("Enter Email:");
       const pass = prompt("Enter Password:");
       if (email === "artaurex@gmail.com" && pass === "Artaurex@1233") {
+        isLoggedIn = true;
+        document.getElementById('loginBtn').textContent = "LOGOUT";
+        document.getElementById('uploadBtn').style.display = "block";
         alert("✅ Login Successful!");
-        document.getElementById('upload-section').style.display = 'block';
       } else {
         alert("❌ Wrong Email or Password");
       }
     });
 
-    function uploadImage() {
-      alert("Upload function ready hai");
+    // Open Upload Modal
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+      document.getElementById('uploadModal').style.display = "flex";
+    });
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').style.display = "none";
     }
 
-    // ===================== BUTTONS =====================
+    // Show/Hide Totem Type
+    document.getElementById('nftSection').addEventListener('change', function() {
+      document.getElementById('totemType').style.display = this.value === 'totems' ? 'block' : 'none';
+    });
+
+    // Upload Function
+    async function uploadNFTs() {
+      const files = document.getElementById('imageUpload').files;
+      if (files.length === 0) return alert("Koi image select karo!");
+
+      const section = document.getElementById('nftSection').value;
+      let folder = section;
+      if (section === "totems") {
+        folder += "-" + document.getElementById('totemType').value;
+      }
+
+      for (let file of files) {
+        const path = `${folder}/${Date.now()}-${file.name}`;
+        await supabase.storage.from('nfts').upload(path, file, { upsert: true });
+      }
+
+      alert("✅ Images Uploaded Successfully!");
+      closeUploadModal();
+    }
+
+    // Navigation Buttons
     document.getElementById('relicsBtn').addEventListener('click', () => {
-      console.log("Relics clicked");
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('relicsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -237,7 +304,6 @@
     });
 
     document.getElementById('totemsBtn').addEventListener('click', () => {
-      console.log("Totems clicked");
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('totemsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -245,27 +311,24 @@
     });
 
     document.getElementById('bestBtn').addEventListener('click', () => {
-      console.log("Best clicked");
       document.getElementById('bestBtn').classList.add('active');
       document.getElementById('legendaryBtn').classList.remove('active');
       renderGallery('totems-gallery', totemsBestData);
     });
 
     document.getElementById('legendaryBtn').addEventListener('click', () => {
-      console.log("Legendary clicked");
       document.getElementById('legendaryBtn').classList.add('active');
       document.getElementById('bestBtn').classList.remove('active');
       renderGallery('totems-gallery', totemsLegendaryData);
     });
 
-    // Close Modal
+    // Close Preview Modal
     document.querySelector('.close').addEventListener('click', () => {
       document.getElementById('modal').style.display = 'none';
     });
 
     // Initial Load
     window.onload = () => {
-      console.log("Page Loaded Successfully");
       renderGallery('relics-gallery', relicsData);
       renderGallery('totems-gallery', totemsBestData);
     };
