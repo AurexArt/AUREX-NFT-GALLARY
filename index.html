@@ -507,19 +507,58 @@
 
     let isLoggedIn = false;
 
-    // DEMO NFTs
+    async function loadNFTs(){
 
-    relicsData.push({
-      title:"Royal Doge",
-      desc:"Legendary Royal NFT",
-      img:"https://picsum.photos/600/600?1"
-    });
+  const { data, error } =
+    await supabaseClient
+    .from("nfts")
+    .select("*")
+    .order("id",{ ascending:false });
 
-    relicsData.push({
-      title:"Cyber Crown",
-      desc:"Neon Relic Collection",
-      img:"https://picsum.photos/600/600?2"
-    });
+  if(error){
+
+    console.log(error);
+    return;
+
+  }
+
+  relicsData = [];
+  totemsBestData = [];
+  totemsLegendaryData = [];
+
+  data.forEach((nft)=>{
+
+    if(nft.section === "relics"){
+
+      relicsData.push(nft);
+
+    }else{
+
+      if(nft.type === "best"){
+
+        totemsBestData.push(nft);
+
+      }else{
+
+        totemsLegendaryData.push(nft);
+
+      }
+
+    }
+
+  });
+
+  renderGallery(
+    "relics-gallery",
+    relicsData
+  );
+
+  renderGallery(
+    "totems-gallery",
+    totemsBestData
+  );
+
+}
 
     // =========================
     // RENDER GALLERY
@@ -757,33 +796,17 @@
             .from("nfts")
             .getPublicUrl(path);
 
-          const nft = {
+          await supabaseClient
+.from("nfts")
+.insert([{
 
-            title:title,
+  title:title,
+  desc:desc,
+  img:urlData.publicUrl,
+  section:section,
+  type:totemType
 
-            desc:desc,
-
-            img:urlData.publicUrl
-
-          };
-
-          if(section === "relics"){
-
-            relicsData.unshift(nft);
-
-          }else{
-
-            if(totemType === "best"){
-
-              totemsBestData.unshift(nft);
-
-            }else{
-
-              totemsLegendaryData.unshift(nft);
-
-            }
-
-          }
+}]);
 
           uploadedCount++;
 
@@ -813,6 +836,8 @@
       }
 
       refreshGallery();
+
+      await loadNFTs();
 
       setTimeout(()=>{
 
@@ -1065,15 +1090,7 @@ document.getElementById("loginBtn")
     // INITIAL LOAD
     // =========================
 
-    renderGallery(
-      "relics-gallery",
-      relicsData
-    );
-
-    renderGallery(
-      "totems-gallery",
-      totemsBestData
-    );
+    loadNFTs();
 
   </script>
 
