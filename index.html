@@ -511,7 +511,7 @@
 
   const { data, error } =
     await supabaseClient
-    .from("nfts")
+    .from("nfts_data")
     .select("*")
     .order("id",{ ascending:false });
 
@@ -526,15 +526,23 @@
   totemsBestData = [];
   totemsLegendaryData = [];
 
-  data.forEach((nft)=>{
+  data.forEach((item)=>{
 
-    if(nft.section === "relics"){
+    const nft = {
+
+      title:item.title,
+      desc:item.desc,
+      img:item.img
+
+    };
+
+    if(item.section === "relics"){
 
       relicsData.push(nft);
 
     }else{
 
-      if(nft.type === "best"){
+      if(item.type === "best"){
 
         totemsBestData.push(nft);
 
@@ -797,8 +805,8 @@
             .getPublicUrl(path);
 
           await supabaseClient
-.from("nfts")
-.insert([{
+.from("nfts_data")
+.insert([
 
   title:title,
   desc:desc,
