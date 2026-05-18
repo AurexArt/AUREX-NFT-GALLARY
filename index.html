@@ -308,15 +308,17 @@
 
     @media(max-width:768px){
 
-      h1{
-        font-size:3rem;
-      }
+  h1{
+    font-size:3rem;
+  }
 
-      .header-buttons{
-        position:static;
-        justify-content:center;
-        margin-top:20px;
-      }
+  .header-buttons{
+    position:static;
+    justify-content:center;
+    margin-top:20px;
+  }
+
+}
 
 
   </style>
@@ -806,7 +808,7 @@
 
           await supabaseClient
 .from("nfts_data")
-.insert([
+.insert([{
 
   title:title,
   desc:desc,
