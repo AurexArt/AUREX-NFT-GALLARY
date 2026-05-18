@@ -102,13 +102,15 @@
   padding:8px;
   display:grid;
 
-  /* MOBILE PE 4 NFT EK ROW ME */
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  /* MOBILE PE 3 NFT EK ROW */
+  grid-template-columns:repeat(3,1fr);
 
   gap:6px;
 }
 
 .nft-card{
+  width:100%;
+  min-width:0;
   background:#1d0037;
   border-radius:10px;
   overflow:hidden;
@@ -117,29 +119,26 @@
 
 .nft-card img{
   width:100%;
-  height:auto;
   aspect-ratio:1/1;
   object-fit:cover;
   display:block;
 }
 
 .card-content{
-  padding:4px;
+  padding:5px;
   text-align:center;
 }
 
 .card-content h3{
-  font-size:0.55rem;
-  margin-bottom:2px;
+  font-size:0.65rem;
+  margin-bottom:3px;
   color:#ff00ff;
-  word-break:break-word;
 }
 
 .card-content p{
-  font-size:0.45rem;
+  font-size:0.5rem;
   color:#ddd;
-  line-height:1.1;
-  word-break:break-word;
+  line-height:1.2;
 }
 
 /* TABLET */
@@ -161,10 +160,6 @@
     grid-template-columns:repeat(6,1fr);
     gap:15px;
     padding:20px;
-  }
-
-  .card-content{
-    padding:8px;
   }
 
   .card-content h3{
@@ -323,11 +318,6 @@
         margin-top:20px;
       }
 
-      .gallery{
-        grid-template-columns:1fr;
-      }
-
-    }
 
   </style>
 </head>
