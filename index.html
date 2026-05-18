@@ -634,61 +634,49 @@ document.getElementById("saveDescBtn")
     // RENDER GALLERY
     // =========================
 
-    function renderGallery(containerId,data){
+    function renderGallery(containerId, data){
 
-      const container =
-        document.getElementById(containerId);
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
 
-      container.innerHTML = "";
+  if(data.length === 0){
+    container.innerHTML = "<h2 style='text-align:center;width:100%;'>No NFTs Yet</h2>";
+    return;
+  }
 
-      if(data.length === 0){
+  data.forEach((item, index)=>{
 
-        container.innerHTML =
-          "<h2 style='text-align:center;width:100%;'>No NFTs Yet</h2>";
+    const card = document.createElement("div");
+    card.className = "nft-card";
 
-        return;
-      }
+    card.innerHTML = `
+      <img src="${item.img}" alt="${item.title}">
 
-      data.forEach((item,index)=>{
+      <div class="card-content">
+        <h3>${item.title}</h3>
+        <p>${item.desc}</p>
 
-        const card =
-          document.createElement("div");
+        ${isLoggedIn ? `
+          <button class="delete-btn"
+            onclick="deleteNFT('${containerId}', ${index})">
+            DELETE NFT
+          </button>
+        ` : ""}
+      </div>
+    `;
 
-        card.className = "nft-card";
+    card.querySelector("img").onclick = () => {
+      openPreview(item);
+    };
 
-        card.innerHTML = `
-  <img src="${item.img}" alt="${item.title}">
-`;
-              <button
-                class="delete-btn"
-                onclick="deleteNFT('${containerId}',${index})">
-
-                DELETE NFT
-
-              </button>
-              `
-              :
-              ""
-            }
-
-          </div>
-        `;
-
-        card.querySelector("img").onclick = ()=> {
-  openPreview(item);
-};
-
-        container.appendChild(card);
-
-      });
-
-    }
+    container.appendChild(card);
+  });
+}
 
     // =========================
     // PREVIEW
     // =========================
 
-    let currentNFT = null;
 
 function openPreview(item){
 
