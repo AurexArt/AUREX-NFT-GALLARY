@@ -4,102 +4,85 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AUREX | Relics & Totems</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --neon-pink: #ff00ff;
       --neon-cyan: #00ffff;
       --neon-purple: #9d00ff;
-      --neon-green: #39ff14;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       background: #0a001f;
       color: #fff;
       font-family: 'Inter', sans-serif;
       min-height: 100vh;
       background-image: 
-        radial-gradient(circle at 50% 50%, rgba(157, 0, 255, 0.15) 0%, transparent 60%),
-        radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.15) 0%, transparent 60%);
+        radial-gradient(circle at 50% 30%, rgba(157, 0, 255, 0.2) 0%, transparent 60%);
     }
 
     header {
-      position: relative;
       text-align: center;
-      padding: 6rem 1rem 4rem;
+      padding: 80px 20px 40px;
+      position: relative;
     }
+
     header h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 7rem;
+      font-size: 6.5rem;
       font-weight: 700;
-      letter-spacing: 12px;
+      letter-spacing: 15px;
       background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-purple));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 
-        0 0 20px var(--neon-pink),
-        0 0 40px var(--neon-cyan),
-        0 0 60px var(--neon-purple);
+      text-shadow: 0 0 40px var(--neon-pink);
     }
+
     .subtitle {
-      font-size: 1.6rem;
-      letter-spacing: 8px;
+      font-size: 1.8rem;
       color: var(--neon-cyan);
+      letter-spacing: 6px;
       margin-top: 10px;
-      text-shadow: 0 0 15px var(--neon-cyan);
     }
 
     .login-btn {
       position: absolute;
-      top: 35px;
-      right: 35px;
+      top: 40px;
+      right: 40px;
       padding: 14px 32px;
       background: transparent;
       color: var(--neon-cyan);
       border: 2px solid var(--neon-cyan);
       border-radius: 50px;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
-      transition: all 0.4s;
-      box-shadow: 0 0 20px var(--neon-cyan);
-    }
-    .login-btn:hover {
-      background: var(--neon-cyan);
-      color: #000;
-      box-shadow: 0 0 30px var(--neon-cyan);
     }
 
-    /* Navigation */
     .nav {
       display: flex;
       justify-content: center;
       gap: 40px;
-      padding: 25px 0;
-      background: rgba(10, 0, 31, 0.8);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(157, 0, 255, 0.3);
-      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      padding: 30px;
+      background: rgba(10, 0, 31, 0.9);
     }
+
     .nav-btn {
       padding: 16px 45px;
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.3rem;
       background: transparent;
       color: white;
       border: 2px solid var(--neon-pink);
       border-radius: 50px;
       cursor: pointer;
       transition: all 0.4s;
-      text-shadow: 0 0 10px var(--neon-pink);
     }
+
     .nav-btn.active,
     .nav-btn:hover {
       background: var(--neon-pink);
-      color: #000;
-      box-shadow: 0 0 35px var(--neon-pink);
-      transform: scale(1.08);
+      color: black;
+      box-shadow: 0 0 30px var(--neon-pink);
     }
 
     .legendary-banner {
@@ -108,13 +91,11 @@
       margin: 40px auto;
       max-width: 1100px;
       background: rgba(0,0,0,0.7);
-      border: 2px solid var(--neon-green);
+      border: 2px solid #39ff14;
       border-radius: 20px;
-      font-size: 2rem;
+      font-size: 2.1rem;
+      color: #39ff14;
       font-weight: bold;
-      color: var(--neon-green);
-      text-shadow: 0 0 20px var(--neon-green);
-      box-shadow: 0 0 40px rgba(57, 255, 20, 0.4);
     }
 
     .section { display: none; }
@@ -130,42 +111,45 @@
     }
 
     .nft-card {
-      background: rgba(20, 0, 50, 0.6);
+      background: rgba(30, 0, 60, 0.6);
       border-radius: 20px;
       overflow: hidden;
-      border: 2px solid rgba(157, 0, 255, 0.3);
-      transition: all 0.5s ease;
-      position: relative;
+      border: 2px solid rgba(157, 0, 255, 0.4);
+      transition: all 0.5s;
     }
+
     .nft-card:hover {
       border-color: var(--neon-cyan);
-      transform: translateY(-20px);
-      box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+      transform: translateY(-15px);
+      box-shadow: 0 0 40px var(--neon-cyan);
     }
+
     .nft-card img {
       width: 100%;
       height: 360px;
       object-fit: cover;
-      transition: 0.5s;
-    }
-    .nft-card:hover img {
-      transform: scale(1.12);
-      filter: brightness(1.2);
     }
 
     .info {
-      padding: 22px;
+      padding: 20px;
       text-align: center;
-      background: rgba(0,0,0,0.6);
-    }
-    .info h3 {
-      font-size: 1.5rem;
-      color: var(--neon-pink);
-      margin-bottom: 10px;
-      text-shadow: 0 0 10px var(--neon-pink);
     }
 
-    /* Modal */
+    .info h3 {
+      color: var(--neon-pink);
+      margin-bottom: 8px;
+    }
+
+    #upload-section {
+      text-align: center;
+      padding: 30px;
+      margin: 30px 6%;
+      background: rgba(20,0,50,0.6);
+      border: 2px dashed var(--neon-purple);
+      border-radius: 20px;
+      display: none;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -176,31 +160,23 @@
       align-items: center;
       justify-content: center;
     }
+
     .modal-content {
-      border: 3px solid var(--neon-cyan);
       max-width: 750px;
       width: 90%;
+      background: #1a003d;
       border-radius: 25px;
       overflow: hidden;
-      box-shadow: 0 0 60px var(--neon-cyan);
+      border: 3px solid var(--neon-cyan);
     }
+
     .close {
       position: absolute;
       top: 20px;
       right: 30px;
-      font-size: 50px;
+      font-size: 45px;
       color: var(--neon-pink);
       cursor: pointer;
-      text-shadow: 0 0 15px var(--neon-pink);
-    }
-
-    #upload-section {
-      text-align: center;
-      padding: 30px;
-      margin: 30px 6%;
-      border: 2px dashed var(--neon-purple);
-      border-radius: 20px;
-      background: rgba(20,0,50,0.4);
     }
   </style>
 </head>
@@ -208,7 +184,7 @@
 
   <header>
     <h1>AUREX</h1>
-    <p class="subtitle">RELICS &amp; TOTEMS</p>
+    <p class="subtitle">RELICS & TOTEMS</p>
     <button class="login-btn" id="loginBtn">LOGIN</button>
   </header>
 
@@ -217,7 +193,7 @@
     <button class="nav-btn" data-section="totems">TOTEMS</button>
   </nav>
 
-  <!-- Relics -->
+  <!-- Relics Section -->
   <div id="relics-section" class="section active">
     <div class="legendary-banner">
       ALL RELICS ARE LEGENDARY
@@ -225,33 +201,33 @@
     <div class="gallery" id="relics-gallery"></div>
   </div>
 
-  <!-- Totems -->
+  <!-- Totems Section -->
   <div id="totems-section" class="section">
-    <div class="nav" style="margin: 30px 0;">
+    <div class="nav" style="margin:30px 0;">
       <button class="nav-btn active" data-type="best">BEST</button>
       <button class="nav-btn" data-type="legendary">LEGENDARY</button>
     </div>
     <div class="gallery" id="totems-gallery"></div>
   </div>
 
-  <!-- Upload -->
-  <div id="upload-section" style="display:none;">
-    <h3 style="color:var(--neon-cyan); margin-bottom:15px;">Upload New NFT</h3>
-    <input type="file" id="imageUpload" accept="image/*">
+  <!-- Upload Section -->
+  <div id="upload-section">
+    <h2>Upload New NFT</h2>
+    <input type="file" id="imageUpload" accept="image/*"><br><br>
     <select id="nftType">
       <option value="relics">Relics</option>
       <option value="totems-best">Totems - Best</option>
       <option value="totems-legendary">Totems - Legendary</option>
-    </select>
-    <button onclick="uploadImage()" style="background:var(--neon-pink); color:black; padding:12px 30px; border:none; border-radius:50px;">UPLOAD</button>
+    </select><br><br>
+    <button onclick="uploadImage()">Upload Image</button>
   </div>
 
   <!-- Modal -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <span class="close">×</span>
-      <img id="modalImage" src="" alt="">
-      <div style="padding:25px; text-align:center; background:rgba(0,0,0,0.7);">
+      <img id="modalImage" src="" alt="" style="width:100%;">
+      <div style="padding:25px; text-align:center;">
         <h2 id="modalTitle" style="color:var(--neon-cyan);"></h2>
         <p id="modalDesc"></p>
       </div>
@@ -259,49 +235,85 @@
   </div>
 
   <script>
-    const ADMIN_EMAIL = "artaurex@gmail.com";
-    const ADMIN_PASS = "Artaurex@1233";
+    // ================= SUPABASE CONFIG =================
+    const SUPABASE_URL = 'https://svlhichdvqkjqdyxposi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM';
+
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let isLoggedIn = false;
 
-    document.getElementById('loginBtn').addEventListener('click', () => {
+    // Login
+    document.getElementById('loginBtn').addEventListener('click', async () => {
       if (isLoggedIn) {
+        await supabase.auth.signOut();
         isLoggedIn = false;
         document.getElementById('loginBtn').textContent = "LOGIN";
         document.getElementById('upload-section').style.display = 'none';
-      } else {
-        const email = prompt("Enter Email:");
-        const pass = prompt("Enter Password:");
-        if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+        return;
+      }
+
+      const email = prompt("Enter Email:");
+      const password = prompt("Enter Password:");
+
+      if (email === "artaurex@gmail.com" && password === "Artaurex@1233") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+          alert("Supabase Error: " + error.message);
+        } else {
           isLoggedIn = true;
           document.getElementById('loginBtn').textContent = "LOGOUT";
           document.getElementById('upload-section').style.display = 'block';
-          alert("✅ Welcome Admin");
-        } else {
-          alert("❌ Wrong Credentials");
+          alert("✅ Login Successful! Ab upload kar sakte ho.");
         }
+      } else {
+        alert("❌ Wrong Email or Password");
       }
     });
 
-    // Sample Data
+    // Upload Function
+    async function uploadImage() {
+      if (!isLoggedIn) return alert("Pehle Login Karo!");
+
+      const file = document.getElementById('imageUpload').files[0];
+      if (!file) return alert("Koi file select nahi kiya!");
+
+      const type = document.getElementById('nftType').value;
+      const filePath = `${type}/${Date.now()}-${file.name}`;
+
+      const { error } = await supabase.storage
+        .from('nfts')
+        .upload(filePath, file, { upsert: true });
+
+      if (error) {
+        alert("Upload Failed: " + error.message);
+      } else {
+        alert("✅ Image Uploaded Successfully!");
+        document.getElementById('imageUpload').value = '';
+      }
+    }
+
+    // Sample Gallery Data
     const relicsData = [
       { title: "Ancient Sun Relic", img: "https://picsum.photos/id/1015/800/600", desc: "Eternal power of the lost sun" },
-      { title: "Void Crystal", img: "https://picsum.photos/id/201/800/600", desc: "Portal to another dimension" }
+      { title: "Void Crystal Relic", img: "https://picsum.photos/id/201/800/600", desc: "Holds infinite darkness" }
     ];
 
     const totemsBestData = [
-      { title: "Wolf Spirit", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the ancient forest" }
+      { title: "Wolf Spirit Totem", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the wild" }
     ];
 
     const totemsLegendaryData = [
-      { title: "Phoenix Rebirth", img: "https://picsum.photos/id/866/800/600", desc: "Immortal flame of legends" }
+      { title: "Phoenix Rebirth", img: "https://picsum.photos/id/866/800/600", desc: "Rises from eternal flames" }
     ];
 
-    function renderGallery(galleryId, data) {
-      const container = document.getElementById(galleryId);
-      container.innerHTML = "";
+    function renderGallery(id, data) {
+      const gallery = document.getElementById(id);
+      gallery.innerHTML = '';
       data.forEach(item => {
         const card = document.createElement('div');
-        card.className = "nft-card";
+        card.className = 'nft-card';
         card.innerHTML = `
           <img src="${item.img}" alt="${item.title}">
           <div class="info">
@@ -310,7 +322,7 @@
           </div>
         `;
         card.onclick = () => showModal(item);
-        container.appendChild(card);
+        gallery.appendChild(card);
       });
     }
 
@@ -318,10 +330,10 @@
       document.getElementById('modalImage').src = item.img;
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalDesc').textContent = item.desc;
-      document.getElementById('modal').style.display = "flex";
+      document.getElementById('modal').style.display = 'flex';
     }
 
-    // Tab Navigation
+    // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -338,16 +350,11 @@
       document.getElementById('modal').style.display = 'none';
     });
 
-    // Initial Load
+    // Initial Render
     window.onload = () => {
       renderGallery('relics-gallery', relicsData);
       renderGallery('totems-gallery', totemsBestData);
     };
-
-    function uploadImage() {
-      if (!isLoggedIn) return alert("Please Login First");
-      alert("Upload feature is ready. Supabase connect karna ho to bata dena.");
-    }
   </script>
 </body>
 </html>
