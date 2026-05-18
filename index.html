@@ -137,14 +137,14 @@
 
   <!-- Totems Section -->
   <div id="totems-section" class="section">
-    <div style="text-align:center; padding:20px;">
+    <div style="text-align:center; padding:20px 0;">
       <button class="nav-btn active" id="bestBtn">BEST</button>
       <button class="nav-btn" id="legendaryBtn">LEGENDARY</button>
     </div>
     <div class="gallery" id="totems-gallery"></div>
   </div>
 
-  <!-- Upload -->
+  <!-- Upload Section -->
   <div id="upload-section">
     <h2>Upload New NFT</h2>
     <input type="file" id="imageUpload" accept="image/*"><br><br>
@@ -160,7 +160,7 @@
   <div class="modal" id="modal">
     <div class="modal-content">
       <span class="close">×</span>
-      <img id="modalImage" src="" alt="" style="width:100%; max-height:550px;">
+      <img id="modalImage" src="" alt="" style="width:100%; max-height:550px; object-fit:contain;">
       <div style="padding:20px; text-align:center;">
         <h2 id="modalTitle"></h2>
         <p id="modalDesc"></p>
@@ -169,23 +169,15 @@
   </div>
 
   <script>
-    // Supabase Config
-    const supabase = Supabase.createClient(
-      'https://svlhichdvqkjqdyxposi.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM'
-    );
-
-    let isLoggedIn = false;
-
-    // Sample Data
+    // ================== DATA ==================
     const relicsData = [
       { title: "Ancient Sun Relic", img: "https://picsum.photos/id/1015/800/600", desc: "Eternal power of the sun" },
-      { title: "Void Crystal", img: "https://picsum.photos/id/201/800/600", desc: "Holds infinite darkness" }
+      { title: "Void Crystal Relic", img: "https://picsum.photos/id/201/800/600", desc: "Holds infinite darkness" }
     ];
 
     const totemsBestData = [
-      { title: "Wolf Spirit Totem", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the wild" },
-      { title: "Eagle Eye Totem", img: "https://picsum.photos/id/180/800/600", desc: "Sees everything" }
+      { title: "Wolf Spirit", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the wild" },
+      { title: "Eagle Eye", img: "https://picsum.photos/id/180/800/600", desc: "Sees everything" }
     ];
 
     const totemsLegendaryData = [
@@ -193,6 +185,7 @@
       { title: "Dragon King", img: "https://picsum.photos/id/1016/800/600", desc: "Supreme legendary totem" }
     ];
 
+    // Render Gallery
     function renderGallery(containerId, data) {
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -220,54 +213,46 @@
 
     // Login
     document.getElementById('loginBtn').addEventListener('click', () => {
-      if (isLoggedIn) {
-        isLoggedIn = false;
-        document.getElementById('loginBtn').textContent = "LOGIN";
-        document.getElementById('upload-section').style.display = 'none';
-        return;
-      }
       const email = prompt("Enter Email:");
       const pass = prompt("Enter Password:");
       if (email === "artaurex@gmail.com" && pass === "Artaurex@1233") {
-        isLoggedIn = true;
-        document.getElementById('loginBtn').textContent = "LOGOUT";
+        alert("✅ Login Successful!");
         document.getElementById('upload-section').style.display = 'block';
-        alert("Login Successful!");
       } else {
-        alert("Wrong Email or Password");
+        alert("❌ Wrong Email or Password");
       }
     });
 
-    async function uploadImage() {
-      if (!isLoggedIn) return alert("Login first!");
-      alert("Upload ready hai");
+    function uploadImage() {
+      alert("Upload function ready hai");
     }
 
-    // Relics Button
+    // ===================== BUTTONS =====================
     document.getElementById('relicsBtn').addEventListener('click', () => {
+      console.log("Relics clicked");
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('relicsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('relics-section').classList.add('active');
     });
 
-    // Totems Button
     document.getElementById('totemsBtn').addEventListener('click', () => {
+      console.log("Totems clicked");
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('totemsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('totems-section').classList.add('active');
     });
 
-    // Best Button
     document.getElementById('bestBtn').addEventListener('click', () => {
+      console.log("Best clicked");
       document.getElementById('bestBtn').classList.add('active');
       document.getElementById('legendaryBtn').classList.remove('active');
       renderGallery('totems-gallery', totemsBestData);
     });
 
-    // Legendary Button
     document.getElementById('legendaryBtn').addEventListener('click', () => {
+      console.log("Legendary clicked");
       document.getElementById('legendaryBtn').classList.add('active');
       document.getElementById('bestBtn').classList.remove('active');
       renderGallery('totems-gallery', totemsLegendaryData);
@@ -280,6 +265,7 @@
 
     // Initial Load
     window.onload = () => {
+      console.log("Page Loaded Successfully");
       renderGallery('relics-gallery', relicsData);
       renderGallery('totems-gallery', totemsBestData);
     };
