@@ -451,21 +451,38 @@
 
   <div class="modal" id="previewModal">
 
-    <div class="modal-content">
+  <div class="modal-content">
 
-      <span class="close" id="closePreview">
-        &times;
-      </span>
+    <span class="close" id="closePreview">
+      &times;
+    </span>
 
-      <img id="modalImage" src=""/>
+    <h2 id="modalTitle"></h2>
 
-      <h2 id="modalTitle"></h2>
+    <p id="modalDesc"></p>
 
-      <p id="modalDesc"></p>
+    <!-- ADMIN EDIT -->
 
-    </div>
+    <textarea
+      id="editDesc"
+      style="
+      display:none;
+      margin-top:20px;
+      "
+      rows="5"></textarea>
+
+    <button
+      id="saveDescBtn"
+      style="
+      display:none;
+      margin-top:15px;
+      ">
+      SAVE DESCRIPTION
+    </button>
 
   </div>
+
+</div>
 
   <!-- LOADER -->
 
@@ -509,6 +526,42 @@
 
     let isLoggedIn = false;
 
+    let currentNFT = null;
+
+document.getElementById("saveDescBtn")
+.addEventListener("click", async ()=>{
+
+  const newDesc =
+    document.getElementById("editDesc")
+    .value.trim();
+
+  if(!currentNFT) return;
+
+  const { error } =
+    await supabaseClient
+    .from("nfts_data")
+    .update({
+      description: newDesc
+    })
+    .eq("id", currentNFT.id);
+
+  if(error){
+    console.log(error);
+    alert("Update Failed");
+    return;
+  }
+
+  alert("Description Updated");
+
+  currentNFT.desc = newDesc;
+
+  document.getElementById("modalDesc")
+  .innerText = newDesc;
+
+  await loadNFTs();
+
+});
+    
     async function loadNFTs(){
 
   const { data, error } =
@@ -604,19 +657,8 @@
         card.className = "nft-card";
 
         card.innerHTML = `
-
-          <img src="${item.img}" alt="${item.title}">
-
-          <div class="card-content">
-
-            <h3>${item.title}</h3>
-
-            <p>${item.desc}</p>
-
-            ${
-              isLoggedIn
-              ?
-              `
+  <img src="${item.img}" alt="${item.title}">
+`;
               <button
                 class="delete-btn"
                 onclick="deleteNFT('${containerId}',${index})">
@@ -646,21 +688,47 @@
     // PREVIEW
     // =========================
 
-    function openPreview(item){
+    let currentNFT = null;
 
-      document.getElementById("previewModal")
-      .style.display = "flex";
+function openPreview(item){
 
-      document.getElementById("modalImage")
-      .src = item.img;
+  currentNFT = item;
 
-      document.getElementById("modalTitle")
-      .innerText = item.title;
+  document.getElementById("previewModal")
+  .style.display = "flex";
 
-      document.getElementById("modalDesc")
-      .innerText = item.desc;
+  document.getElementById("modalTitle")
+  .innerText = item.title;
 
-    }
+  document.getElementById("modalDesc")
+  .innerText = item.desc;
+
+  // ADMIN CONTROLS
+
+  if(isLoggedIn){
+
+    document.getElementById("editDesc")
+    .style.display = "block";
+
+    document.getElementById("saveDescBtn")
+    .style.display = "block";
+
+    document.getElementById("editDesc")
+    .value = item.desc;
+
+  }
+
+  else{
+
+    document.getElementById("editDesc")
+    .style.display = "none";
+
+    document.getElementById("saveDescBtn")
+    .style.display = "none";
+
+  }
+
+}
 
     function closePreview(){
 
