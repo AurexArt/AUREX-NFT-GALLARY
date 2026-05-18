@@ -518,10 +518,8 @@
     .order("id",{ ascending:false });
 
   if(error){
-
     console.log(error);
     return;
-
   }
 
   relicsData = [];
@@ -532,23 +530,32 @@
 
     const nft = {
 
+      id:item.id,
       title:item.title,
       desc:item.description,
-      img:item.img
+      img:item.img,
+      section:item.section,
+      type:item.type
 
     };
 
+    // RELICS
     if(item.section === "relics"){
 
       relicsData.push(nft);
 
-    }else{
+    }
+
+    // TOTEMS
+    else if(item.section === "totems"){
 
       if(item.type === "best"){
 
         totemsBestData.push(nft);
 
-      }else{
+      }
+
+      else if(item.type === "legendary"){
 
         totemsLegendaryData.push(nft);
 
@@ -563,13 +570,13 @@
     relicsData
   );
 
+  // DEFAULT
   renderGallery(
     "totems-gallery",
     totemsBestData
   );
 
 }
-
     // =========================
     // RENDER GALLERY
     // =========================
@@ -677,62 +684,80 @@
     // DELETE NFT
     // =========================
 
-    async function deleteNFT(containerId,index){
+   async function deleteNFT(containerId,index){
 
-      const confirmDelete =
-        confirm("Delete this NFT?");
+  const confirmDelete =
+    confirm("Delete this NFT permanently?");
 
-      if(!confirmDelete) return;
+  if(!confirmDelete) return;
 
-      try{
+  let nft;
 
-        if(containerId === "relics-gallery"){
+  // FIND NFT
+  if(containerId === "relics-gallery"){
 
-          relicsData.splice(index,1);
+    nft = relicsData[index];
 
-          renderGallery(
-            "relics-gallery",
-            relicsData
-          );
+  }else{
 
-        }else{
+    if(
+      document.getElementById("bestBtn")
+      .classList.contains("active")
+    ){
 
-          if(
-            document.getElementById("bestBtn")
-            .classList.contains("active")
-          ){
+      nft = totemsBestData[index];
 
-            totemsBestData.splice(index,1);
+    }else{
 
-            renderGallery(
-              "totems-gallery",
-              totemsBestData
-            );
-
-          }else{
-
-            totemsLegendaryData.splice(index,1);
-
-            renderGallery(
-              "totems-gallery",
-              totemsLegendaryData
-            );
-
-          }
-
-        }
-
-        alert("NFT Deleted");
-
-      }catch(err){
-
-        console.log(err);
-
-        alert("Delete Failed");
-
-      }
+      nft = totemsLegendaryData[index];
 
     }
+
+  }
+
+  try{
+
+    // DELETE FROM DATABASE
+    const { error } =
+      await supabaseClient
+      .from("nfts_data")
+      .delete()
+      .eq("id",nft.id);
+
+    if(error){
+
+      console.log(error);
+      alert("Delete Failed");
+      return;
+
+    }
+
+    // REMOVE FROM STORAGE ALSO
+    const imagePath =
+      nft.img.split("/storage/v1/object/public/nfts/")[1];
+
+    if(imagePath){
+
+      await supabaseClient
+      .storage
+      .from("nfts")
+      .remove([imagePath]);
+
+    }
+
+    alert("NFT Deleted Permanently");
+
+    // RELOAD
+    await loadNFTs();
+
+  }catch(err){
+
+    console.log(err);
+    alert("Delete Failed");
+
+  }
+
+}
 
     // =========================
     // UPLOAD NFT
