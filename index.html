@@ -650,17 +650,17 @@ document.getElementById("saveDescBtn")
     card.className = "nft-card";
 
     card.innerHTML = `
-  <img src="${item.img}" alt="${item.title}">
-`;
-
-        ${isLoggedIn ? `
-          <button class="delete-btn"
-            onclick="deleteNFT('${containerId}', ${index})">
-            DELETE NFT
-          </button>
-        ` : ""}
-      </div>
+      <img src="${item.img}" alt="${item.title}">
     `;
+
+    // DELETE BUTTON (ONLY IF LOGGED IN)
+    if(isLoggedIn){
+      const btn = document.createElement("button");
+      btn.className = "delete-btn";
+      btn.innerText = "DELETE NFT";
+      btn.onclick = () => deleteNFT(containerId, index);
+      card.appendChild(btn);
+    }
 
     card.querySelector("img").onclick = () => {
       openPreview(item);
