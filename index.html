@@ -650,11 +650,8 @@ document.getElementById("saveDescBtn")
     card.className = "nft-card";
 
     card.innerHTML = `
-      <img src="${item.img}" alt="${item.title}">
-
-      <div class="card-content">
-        <h3>${item.title}</h3>
-        <p>${item.desc}</p>
+  <img src="${item.img}" alt="${item.title}">
+`;
 
         ${isLoggedIn ? `
           <button class="delete-btn"
