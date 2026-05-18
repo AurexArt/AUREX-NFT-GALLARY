@@ -6,6 +6,7 @@
   <title>AUREX | Relics & Totems</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* ... same style as before ... */
     body {
       background: #0a001f;
       color: #fff;
@@ -103,6 +104,7 @@
 </head>
 <body>
 
+  <!-- Same HTML as before (header, nav, sections, modals) -->
   <header>
     <h1>AUREX</h1>
     <div class="header-buttons">
@@ -129,7 +131,7 @@
     <div class="gallery" id="totems-gallery"></div>
   </div>
 
-  <!-- Upload Modal -->
+  <!-- Upload Modal (same) -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <h2 style="text-align:center; color:#ff00ff;">Upload New NFT</h2>
@@ -156,7 +158,7 @@
     </div>
   </div>
 
-  <!-- Preview Modal -->
+  <!-- Preview Modal (same) -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <span class="close">×</span>
@@ -169,17 +171,18 @@
   </div>
 
   <script>
-    // ==================== SUPABASE CONFIG ====================
-    const supabaseUrl = 'https://svlhichdvqkjqdyxposi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM';
+    // ==================== SUPABASE INITIALIZE ====================
+    const supabaseUrl = 'https://svlhichdvqkjqdyxposi.supabase.co';   // ← Yahan apna URL daal
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM';                 // ← Yahan apna Anon Key daal
 
     const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Data Arrays
+    // Data (initial)
     let relicsData = [];
     let totemsBestData = [];
     let totemsLegendaryData = [];
 
+    // Render function
     function renderGallery(containerId, data) {
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -205,13 +208,14 @@
       document.getElementById('modal').style.display = "flex";
     }
 
-    // Upload Function
+    // ==================== UPLOAD FUNCTION (FIXED) ====================
     async function uploadNFTs() {
       const files = document.getElementById('imageUpload').files;
       if (files.length === 0) return alert("Koi image select karo!");
 
       const section = document.getElementById('nftSection').value;
       let folder = section;
+
       if (section === "totems") {
         folder += "-" + document.getElementById('totemType').value;
       }
@@ -223,21 +227,22 @@
         const path = `${folder}/${fileName}`;
 
         try {
-          const { error } = await supabase.storage
+          const { data, error } = await supabase.storage
             .from('nfts')
             .upload(path, file, { upsert: true });
 
           if (error) throw error;
 
-          // Get Public URL
+          // Get public URL
           const { data: urlData } = supabase.storage.from('nfts').getPublicUrl(path);
-
+          
           const newItem = {
             title: document.getElementById('nftName').value || file.name.split('.')[0],
             img: urlData.publicUrl,
-            desc: document.getElementById('nftDesc').value || "No description"
+            desc: document.getElementById('nftDesc').value || "Uploaded NFT"
           };
 
+          // Add to respective array
           if (section === "relics") {
             relicsData.unshift(newItem);
           } else if (section === "totems") {
@@ -249,29 +254,30 @@
           uploadedCount++;
         } catch (err) {
           console.error(err);
-          alert("Upload error: " + file.name);
+          alert("Upload failed for: " + file.name);
         }
       }
 
       if (uploadedCount > 0) {
-        alert(`✅ ${uploadedCount} NFT Successfully Uploaded!`);
-
-        // Refresh current gallery
+        alert(`✅ ${uploadedCount} NFT(s) Uploaded Successfully!`);
+        
+        // Refresh current visible gallery
         if (document.getElementById('relics-section').classList.contains('active')) {
           renderGallery('relics-gallery', relicsData);
         } else {
-          const isBest = document.getElementById('bestBtn').classList.contains('active');
-          renderGallery('totems-gallery', isBest ? totemsBestData : totemsLegendaryData);
+          const activeTotem = document.getElementById('bestBtn').classList.contains('active') ? totemsBestData : totemsLegendaryData;
+          renderGallery('totems-gallery', activeTotem);
         }
       }
 
       closeUploadModal();
+      // Clear form
       document.getElementById('nftName').value = '';
       document.getElementById('nftDesc').value = '';
       document.getElementById('imageUpload').value = '';
     }
 
-    // Login System
+    // Rest of your script (login, navigation, etc.) remains same
     let isLoggedIn = false;
     document.getElementById('loginBtn').addEventListener('click', () => {
       if (isLoggedIn) {
@@ -305,10 +311,10 @@
       document.getElementById('totemType').style.display = this.value === 'totems' ? 'block' : 'none';
     });
 
-    // Navigation
+    // Navigation (same)
     document.getElementById('relicsBtn').addEventListener('click', () => {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+      document.getElementById('relicsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('relics-section').classList.add('active');
       renderGallery('relics-gallery', relicsData);
@@ -316,7 +322,7 @@
 
     document.getElementById('totemsBtn').addEventListener('click', () => {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+      document.getElementById('totemsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('totems-section').classList.add('active');
       renderGallery('totems-gallery', totemsBestData);
@@ -338,7 +344,9 @@
       document.getElementById('modal').style.display = 'none';
     });
 
+    // Initial Load
     window.onload = () => {
+      // You can keep some demo data or start empty
       renderGallery('relics-gallery', relicsData);
       renderGallery('totems-gallery', totemsBestData);
     };
