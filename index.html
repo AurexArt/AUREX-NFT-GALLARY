@@ -15,7 +15,7 @@
     }
     header {
       text-align: center;
-      padding: 60px 20px 30px;
+      padding: 60px 20px 20px;
       position: relative;
     }
     h1 {
@@ -27,7 +27,7 @@
       position: absolute;
       top: 30px;
       right: 30px;
-      padding: 12px 25px;
+      padding: 12px 28px;
       background: transparent;
       color: #00ffff;
       border: 2px solid #00ffff;
@@ -37,13 +37,13 @@
     .nav {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      padding: 20px;
+      gap: 30px;
+      padding: 25px;
       background: #1a0033;
     }
     .nav-btn {
-      padding: 12px 35px;
-      font-size: 1.2rem;
+      padding: 14px 40px;
+      font-size: 1.3rem;
       background: transparent;
       color: white;
       border: 2px solid #ff00ff;
@@ -54,23 +54,28 @@
       background: #ff00ff;
       color: black;
     }
+
     .section { display: none; }
     .section.active { display: block; }
+
     .legendary-banner {
       padding: 20px;
-      background: linear-gradient(#ffd700, #ff8800);
+      background: linear-gradient(#ffd700, #ffaa00);
       color: black;
       font-size: 1.8rem;
       margin: 20px auto;
       max-width: 900px;
-      border-radius: 15px;
+      border-radius: 12px;
+      font-weight: bold;
     }
+
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
+      gap: 25px;
       padding: 30px 5%;
     }
+
     .nft-card {
       background: #1f003d;
       border-radius: 15px;
@@ -82,6 +87,7 @@
       height: 320px;
       object-fit: cover;
     }
+
     #upload-section {
       display: none;
       text-align: center;
@@ -90,6 +96,7 @@
       margin: 20px 5%;
       border-radius: 15px;
     }
+
     .modal {
       display: none;
       position: fixed;
@@ -100,18 +107,11 @@
       align-items: center;
       justify-content: center;
     }
-    .modal-content {
-      background: #1a0033;
-      max-width: 700px;
-      width: 90%;
-      border-radius: 20px;
-      overflow: hidden;
-    }
     .close {
       position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 40px;
+      top: 20px;
+      right: 30px;
+      font-size: 45px;
       color: #ff00ff;
       cursor: pointer;
     }
@@ -137,14 +137,14 @@
 
   <!-- Totems Section -->
   <div id="totems-section" class="section">
-    <div class="nav" style="background:none; padding:15px;">
+    <div style="text-align:center; padding:20px;">
       <button class="nav-btn active" id="bestBtn">BEST</button>
       <button class="nav-btn" id="legendaryBtn">LEGENDARY</button>
     </div>
     <div class="gallery" id="totems-gallery"></div>
   </div>
 
-  <!-- Upload Section -->
+  <!-- Upload -->
   <div id="upload-section">
     <h2>Upload New NFT</h2>
     <input type="file" id="imageUpload" accept="image/*"><br><br>
@@ -160,7 +160,7 @@
   <div class="modal" id="modal">
     <div class="modal-content">
       <span class="close">×</span>
-      <img id="modalImage" src="" alt="" style="width:100%;">
+      <img id="modalImage" src="" alt="" style="width:100%; max-height:550px;">
       <div style="padding:20px; text-align:center;">
         <h2 id="modalTitle"></h2>
         <p id="modalDesc"></p>
@@ -169,24 +169,28 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://svlhichdvqkjqdyxposi.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM';
+    // Supabase Config
+    const supabase = Supabase.createClient(
+      'https://svlhichdvqkjqdyxposi.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM'
+    );
 
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let isLoggedIn = false;
 
     // Sample Data
     const relicsData = [
       { title: "Ancient Sun Relic", img: "https://picsum.photos/id/1015/800/600", desc: "Eternal power of the sun" },
-      { title: "Void Crystal Relic", img: "https://picsum.photos/id/201/800/600", desc: "Portal to darkness" }
+      { title: "Void Crystal", img: "https://picsum.photos/id/201/800/600", desc: "Holds infinite darkness" }
     ];
 
     const totemsBestData = [
-      { title: "Wolf Spirit Totem", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the wild" }
+      { title: "Wolf Spirit Totem", img: "https://picsum.photos/id/251/800/600", desc: "Guardian of the wild" },
+      { title: "Eagle Eye Totem", img: "https://picsum.photos/id/180/800/600", desc: "Sees everything" }
     ];
 
     const totemsLegendaryData = [
-      { title: "Phoenix Rebirth", img: "https://picsum.photos/id/866/800/600", desc: "Immortal flame" }
+      { title: "Phoenix Rebirth", img: "https://picsum.photos/id/866/800/600", desc: "Rises from ashes" },
+      { title: "Dragon King", img: "https://picsum.photos/id/1016/800/600", desc: "Supreme legendary totem" }
     ];
 
     function renderGallery(containerId, data) {
@@ -197,7 +201,7 @@
         card.className = "nft-card";
         card.innerHTML = `
           <img src="${item.img}" alt="${item.title}">
-          <div class="info">
+          <div style="padding:15px; text-align:center;">
             <h3>${item.title}</h3>
             <p>${item.desc}</p>
           </div>
@@ -215,18 +219,16 @@
     }
 
     // Login
-    document.getElementById('loginBtn').addEventListener('click', async () => {
+    document.getElementById('loginBtn').addEventListener('click', () => {
       if (isLoggedIn) {
         isLoggedIn = false;
         document.getElementById('loginBtn').textContent = "LOGIN";
         document.getElementById('upload-section').style.display = 'none';
         return;
       }
-
       const email = prompt("Enter Email:");
-      const password = prompt("Enter Password:");
-
-      if (email === "artaurex@gmail.com" && password === "Artaurex@1233") {
+      const pass = prompt("Enter Password:");
+      if (email === "artaurex@gmail.com" && pass === "Artaurex@1233") {
         isLoggedIn = true;
         document.getElementById('loginBtn').textContent = "LOGOUT";
         document.getElementById('upload-section').style.display = 'block';
@@ -237,26 +239,41 @@
     });
 
     async function uploadImage() {
-      if (!isLoggedIn) return alert("Pehle Login Karo!");
-      alert("Upload function ready hai (abhi sample mode mein hai)");
+      if (!isLoggedIn) return alert("Login first!");
+      alert("Upload ready hai");
     }
 
-    // Navigation
+    // Relics Button
     document.getElementById('relicsBtn').addEventListener('click', () => {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('relicsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('relics-section').classList.add('active');
     });
 
+    // Totems Button
     document.getElementById('totemsBtn').addEventListener('click', () => {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('totemsBtn').classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById('totems-section').classList.add('active');
     });
 
-    // Modal Close
+    // Best Button
+    document.getElementById('bestBtn').addEventListener('click', () => {
+      document.getElementById('bestBtn').classList.add('active');
+      document.getElementById('legendaryBtn').classList.remove('active');
+      renderGallery('totems-gallery', totemsBestData);
+    });
+
+    // Legendary Button
+    document.getElementById('legendaryBtn').addEventListener('click', () => {
+      document.getElementById('legendaryBtn').classList.add('active');
+      document.getElementById('bestBtn').classList.remove('active');
+      renderGallery('totems-gallery', totemsLegendaryData);
+    });
+
+    // Close Modal
     document.querySelector('.close').addEventListener('click', () => {
       document.getElementById('modal').style.display = 'none';
     });
