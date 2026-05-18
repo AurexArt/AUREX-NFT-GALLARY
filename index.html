@@ -806,7 +806,8 @@
             .from("nfts")
             .getPublicUrl(path);
 
-          await supabaseClient
+          const { error: insertError } =
+await supabaseClient
 .from("nfts_data")
 .insert([{
 
@@ -817,6 +818,16 @@
   type:totemType
 
 }]);
+
+if(insertError){
+
+  console.log(insertError);
+
+  alert(insertError.message);
+
+  continue;
+
+}
 
           uploadedCount++;
 
