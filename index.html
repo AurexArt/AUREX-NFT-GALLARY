@@ -106,7 +106,6 @@
 
     .nft-card{
       width:100%;
-      min-width:0;
       background:#1d0037;
       border-radius:10px;
       overflow:hidden;
@@ -118,23 +117,6 @@
       aspect-ratio:1/1;
       object-fit:cover;
       display:block;
-    }
-
-    .card-content{
-      padding:5px;
-      text-align:center;
-    }
-
-    .card-content h3{
-      font-size:0.65rem;
-      margin-bottom:3px;
-      color:#ff00ff;
-    }
-
-    .card-content p{
-      font-size:0.5rem;
-      color:#ddd;
-      line-height:1.2;
     }
 
     @media(min-width:768px){
@@ -149,12 +131,6 @@
         grid-template-columns:repeat(6,1fr);
         gap:15px;
         padding:20px;
-      }
-      .card-content h3{
-        font-size:0.9rem;
-      }
-      .card-content p{
-        font-size:0.7rem;
       }
     }
 
@@ -177,12 +153,6 @@
       padding:25px;
       position:relative;
       border:2px solid #ff00ff;
-      animation:popup 0.25s ease;
-    }
-
-    @keyframes popup{
-      from{ opacity:0; transform:scale(0.8); }
-      to{ opacity:1; transform:scale(1); }
     }
 
     .close{
@@ -203,39 +173,16 @@
       border:1px solid #440066;
     }
 
-    .modal-content h2{
-      margin:10px 0;
-      text-align:center;
-      color:#ff00ff;
-      font-size:1.6rem;
-    }
-
-    .modal-content p{
-      text-align:center;
-      color:#ddd;
-      line-height:1.5;
-      margin-bottom:15px;
-    }
-
     .modal-content input,
-    .modal-content textarea,
-    .modal-content select{
+    .modal-content textarea{
       width:100%;
-      padding:14px;
-      margin-top:12px;
+      padding:12px;
+      margin:8px 0;
       border:none;
       border-radius:10px;
       background:#2a004d;
       color:white;
       font-size:1rem;
-    }
-
-    .upload-actions{
-      margin-top:20px;
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
     }
 
     .delete-btn{
@@ -248,10 +195,6 @@
       color:white;
       cursor:pointer;
       font-weight:bold;
-    }
-
-    .delete-btn:hover{
-      background:#ff3355;
     }
 
     .loader-overlay{
@@ -342,26 +285,28 @@
         <option value="legendary">Legendary</option>
       </select>
       <input type="file" id="imageUpload" accept="image/*" multiple/>
-      <div class="upload-actions">
+      <div style="margin-top:20px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD</button>
         <button onclick="closeUploadModal()">CANCEL</button>
       </div>
     </div>
   </div>
 
-  <!-- PREVIEW MODAL (UPDATED) -->
+  <!-- PREVIEW MODAL -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
       
-      <img id="modalImage" src="" alt="NFT Image">
-      <h2 id="modalTitle"></h2>
-      <p id="modalDesc"></p>
+      <img id="modalImage" src="" alt="NFT">
+      
+      <h2 id="modalTitleDisplay"></h2>
 
-      <!-- ADMIN EDIT -->
-      <textarea id="editDesc" rows="5" style="display:none;"></textarea>
-      <button id="saveDescBtn" style="display:none; margin-top:15px; padding:12px 30px; width:100%;">
-        SAVE DESCRIPTION
+      <!-- Edit Fields (Only for Admin) -->
+      <input type="text" id="editTitle" placeholder="NFT Name" style="display:none;"/>
+      <textarea id="editDesc" rows="5" placeholder="Description" style="display:none;"></textarea>
+      
+      <button id="saveBtn" style="display:none; margin-top:15px; padding:12px; width:100%; background:#00ff88; color:black; border:none; border-radius:10px; font-weight:bold;">
+        SAVE CHANGES
       </button>
     </div>
   </div>
@@ -374,7 +319,7 @@
 
   <script>
     // =========================
-    // SUPABASE
+    // SUPABASE CONFIG
     // =========================
     const SUPABASE_URL = "https://svlhichdvqkjqdyxposi.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM";
@@ -382,7 +327,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // =========================
-    // DATA
+    // GLOBAL VARIABLES
     // =========================
     let relicsData = [];
     let totemsBestData = [];
@@ -391,33 +336,47 @@
     let currentNFT = null;
 
     // =========================
-    // SAVE DESCRIPTION
+    // SAVE TITLE + DESCRIPTION
     // =========================
-    document.getElementById("saveDescBtn").addEventListener("click", async () => {
+    document.getElementById("saveBtn").addEventListener("click", async () => {
       if (!currentNFT) return;
 
+      const newTitle = document.getElementById("editTitle").value.trim();
       const newDesc = document.getElementById("editDesc").value.trim();
+
+      if (!newTitle) {
+        alert("NFT Name cannot be empty!");
+        return;
+      }
 
       const { error } = await supabaseClient
         .from("nfts_data")
-        .update({ description: newDesc })
+        .update({ 
+          title: newTitle,
+          description: newDesc 
+        })
         .eq("id", currentNFT.id);
 
       if (error) {
         console.error(error);
-        alert("Update Failed");
+        alert("Save Failed!");
         return;
       }
 
-      currentNFT.desc = newDesc;
-      document.getElementById("modalDesc").innerText = newDesc;
+      alert("Changes Saved Successfully!");
 
-      alert("Description Updated Successfully!");
+      // Update current object
+      currentNFT.title = newTitle;
+      currentNFT.desc = newDesc;
+
+      // Update modal display
+      document.getElementById("modalTitleDisplay").innerText = newTitle;
+
       await loadNFTs();
     });
 
     // =========================
-    // LOAD NFTs
+    // LOAD ALL NFTs
     // =========================
     async function loadNFTs(){
       const { data, error } = await supabaseClient
@@ -447,11 +406,8 @@
         if (item.section === "relics") {
           relicsData.push(nft);
         } else if (item.section === "totems") {
-          if (item.type === "best") {
-            totemsBestData.push(nft);
-          } else if (item.type === "legendary") {
-            totemsLegendaryData.push(nft);
-          }
+          if (item.type === "best") totemsBestData.push(nft);
+          else if (item.type === "legendary") totemsLegendaryData.push(nft);
         }
       });
 
@@ -467,7 +423,7 @@
       container.innerHTML = "";
 
       if(data.length === 0){
-        container.innerHTML = "<h2 style='text-align:center;width:100%;'>No NFTs Yet</h2>";
+        container.innerHTML = "<h2 style='text-align:center;width:100%; padding:20px;'>No NFTs Yet</h2>";
         return;
       }
 
@@ -475,16 +431,14 @@
         const card = document.createElement("div");
         card.className = "nft-card";
 
-        card.innerHTML = `
-          <img src="${item.img}" alt="${item.title}">
-        `;
+        card.innerHTML = `<img src="${item.img}" alt="${item.title}">`;
 
         if(isLoggedIn){
-          const btn = document.createElement("button");
-          btn.className = "delete-btn";
-          btn.innerText = "DELETE NFT";
-          btn.onclick = () => deleteNFT(item.id);
-          card.appendChild(btn);
+          const delBtn = document.createElement("button");
+          delBtn.className = "delete-btn";
+          delBtn.innerText = "DELETE NFT";
+          delBtn.onclick = () => deleteNFT(item.id);
+          card.appendChild(delBtn);
         }
 
         card.querySelector("img").onclick = () => openPreview(item);
@@ -500,19 +454,22 @@
 
       document.getElementById("previewModal").style.display = "flex";
       document.getElementById("modalImage").src = item.img;
-      document.getElementById("modalTitle").innerText = item.title;
-      document.getElementById("modalDesc").innerText = item.desc || "No description";
+      document.getElementById("modalTitleDisplay").innerText = item.title;
 
-      const editArea = document.getElementById("editDesc");
-      const saveBtn = document.getElementById("saveDescBtn");
+      const editTitleField = document.getElementById("editTitle");
+      const editDescField = document.getElementById("editDesc");
+      const saveButton = document.getElementById("saveBtn");
 
       if(isLoggedIn){
-        editArea.style.display = "block";
-        saveBtn.style.display = "block";
-        editArea.value = item.desc || "";
+        editTitleField.style.display = "block";
+        editDescField.style.display = "block";
+        saveButton.style.display = "block";
+        editTitleField.value = item.title;
+        editDescField.value = item.desc || "";
       } else {
-        editArea.style.display = "none";
-        saveBtn.style.display = "none";
+        editTitleField.style.display = "none";
+        editDescField.style.display = "none";
+        saveButton.style.display = "none";
       }
     }
 
@@ -526,21 +483,15 @@
     async function deleteNFT(id){
       if(!confirm("Delete this NFT permanently?")) return;
 
-      try{
-        const { error } = await supabaseClient
-          .from("nfts_data")
-          .delete()
-          .eq("id", id);
+      const { error } = await supabaseClient
+        .from("nfts_data")
+        .delete()
+        .eq("id", id);
 
-        if(error){
-          alert("Delete Failed");
-          return;
-        }
-
-        await loadNFTs();
-      }catch(err){
-        console.log(err);
+      if(error){
         alert("Delete Failed");
+      } else {
+        await loadNFTs();
       }
     }
 
@@ -550,7 +501,7 @@
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
       if(files.length === 0){
-        alert("Select image first");
+        alert("Please select at least one image");
         return;
       }
 
@@ -573,34 +524,27 @@
             .from("nfts")
             .upload(path, file, { cacheControl: "1", upsert: true });
 
-          if(uploadError) {
-            console.log(uploadError);
-            continue;
-          }
+          if(uploadError) continue;
 
           const { data: urlData } = supabaseClient.storage
             .from("nfts")
             .getPublicUrl(path);
 
-          const { error: insertError } = await supabaseClient
-            .from("nfts_data")
-            .insert([{
-              title: title,
-              description: desc,
-              img: urlData.publicUrl,
-              section: section,
-              type: totemType
-            }]);
+          await supabaseClient.from("nfts_data").insert([{
+            title: title,
+            description: desc,
+            img: urlData.publicUrl,
+            section: section,
+            type: totemType
+          }]);
 
-          if(!insertError) uploadedCount++;
-        }catch(err){
+          uploadedCount++;
+        } catch(err){
           console.log(err);
         }
       }
 
-      document.getElementById("loaderText").innerText = uploadedCount > 0 
-        ? uploadedCount + " NFT(s) Uploaded Successfully" 
-        : "Upload Failed";
+      document.getElementById("loaderText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
 
       await loadNFTs();
 
@@ -608,7 +552,7 @@
         document.getElementById("loader").style.display = "none";
         document.getElementById("loaderText").innerText = "Uploading NFT...";
         closeUploadModal();
-      }, 1500);
+      }, 1800);
     }
 
     function closeUploadModal(){
@@ -616,7 +560,7 @@
     }
 
     // =========================
-    // LOGIN
+    // LOGIN SYSTEM
     // =========================
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
@@ -628,8 +572,8 @@
         return;
       }
 
-      const secretWord = prompt("Enter Secret Word");
-      if(secretWord === "tmkc" || secretWord === "Tmkc"){
+      const secret = prompt("Enter Secret Word");
+      if(secret === "tmkc" || secret === "Tmkc"){
         isLoggedIn = true;
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
@@ -641,18 +585,17 @@
     });
 
     // =========================
-    // EVENT LISTENERS
+    // OTHER EVENT LISTENERS
     // =========================
     document.getElementById("uploadBtn").addEventListener("click", () => {
       document.getElementById("uploadModal").style.display = "flex";
     });
 
     document.getElementById("nftSection").addEventListener("change", function(){
-      document.getElementById("totemType").style.display = 
-        this.value === "totems" ? "block" : "none";
+      document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
     });
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
