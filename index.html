@@ -848,59 +848,59 @@
     // LOGIN
     // =========================
 
+   // =========================
+// LOGIN
+// =========================
+
+document.getElementById("loginBtn")
+.addEventListener("click",()=>{
+
+  if(isLoggedIn){
+
+    isLoggedIn = false;
+
     document.getElementById("loginBtn")
-    .addEventListener("click",()=>{
+    .innerText = "LOGIN";
 
-      if(isLoggedIn){
+    document.getElementById("uploadBtn")
+    .style.display = "none";
 
-        isLoggedIn = false;
+    refreshGallery();
 
-        document.getElementById("loginBtn")
-        .innerText = "LOGIN";
+    alert("Logged Out");
 
-        document.getElementById("uploadBtn")
-        .style.display = "none";
+    return;
 
-        refreshGallery();
+  }
 
-        alert("Logged Out");
+  const secretWord =
+    prompt("Enter Secret Word");
 
-        return;
+  if(
+    secretWord === "tmkc"
+    ||
+    secretWord === "Tmkc"
+  ){
 
-      }
+    isLoggedIn = true;
 
-      const email =
-        prompt("Enter Email");
+    document.getElementById("loginBtn")
+    .innerText = "LOGOUT";
 
-      const password =
-        prompt("Enter Password");
+    document.getElementById("uploadBtn")
+    .style.display = "block";
 
-      if(
-        email === "artaurex@gmail.com"
-        &&
-        password === "Artaurex@1233"
-      ){
+    refreshGallery();
 
-        isLoggedIn = true;
+    alert("Login Successful");
 
-        document.getElementById("loginBtn")
-        .innerText = "LOGOUT";
+  }else{
 
-        document.getElementById("uploadBtn")
-        .style.display = "block";
+    alert("Wrong Secret Word");
 
-        refreshGallery();
+  }
 
-        alert("Login Successful");
-
-      }else{
-
-        alert("Wrong Credentials");
-
-      }
-
-    });
-
+});
     // =========================
     // OPEN UPLOAD
     // =========================
