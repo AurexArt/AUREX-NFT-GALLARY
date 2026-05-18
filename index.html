@@ -6,13 +6,7 @@
   <title>AUREX | Relics & Totems</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      background: #0a001f;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+    body { background: #0a001f; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; }
     header { text-align: center; padding: 60px 20px 20px; position: relative; }
     h1 { font-size: 5.5rem; color: #ff00ff; text-shadow: 0 0 30px #ff00ff; }
     .header-buttons { position: absolute; top: 30px; right: 30px; display: flex; gap: 12px; }
@@ -69,11 +63,7 @@
     }
     .nft-card:hover { transform: scale(1.05); }
 
-    .nft-card img {
-      width: 100%;
-      height: 320px;
-      object-fit: cover;
-    }
+    .nft-card img { width: 100%; height: 320px; object-fit: cover; }
 
     .modal {
       display: none;
@@ -161,7 +151,7 @@
   <!-- Preview Modal -->
   <div class="modal" id="modal">
     <div class="modal-content">
-      <span class="close" style="float:right; font-size:30px; cursor:pointer;">×</span>
+      <span class="close" style="float:right;font-size:35px;cursor:pointer;color:#ff00ff;">×</span>
       <img id="modalImage" src="" alt="" style="width:100%; max-height:550px; object-fit:contain;">
       <div style="padding:20px; text-align:center;">
         <h2 id="modalTitle"></h2>
@@ -171,18 +161,20 @@
   </div>
 
   <script>
-    // Supabase Config
-    const supabaseUrl = 'https://svlhichdvqkjqdyxposi.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM';
-
-    const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+    // Supabase
+    const supabase = Supabase.createClient(
+      'https://svlhichdvqkjqdyxposi.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM'
+    );
 
     let relicsData = [];
     let totemsBestData = [];
     let totemsLegendaryData = [];
+    let isLoggedIn = false;
 
     function renderGallery(containerId, data) {
       const container = document.getElementById(containerId);
+      if (!container) return;
       container.innerHTML = "";
       data.forEach(item => {
         const card = document.createElement('div');
@@ -206,17 +198,15 @@
       document.getElementById('modal').style.display = "flex";
     }
 
-    // Upload Function
     async function uploadNFTs() {
       const files = document.getElementById('imageUpload').files;
-      if (files.length === 0) return alert("Koi image select karo!");
+      if (files.length === 0) return alert("Please select at least one image!");
 
       const section = document.getElementById('nftSection').value;
-      let folder = section === "totems" 
-        ? `totems-${document.getElementById('totemType').value}` 
-        : "relics";
+      const totemType = document.getElementById('totemType').value;
+      const folder = section === "totems" ? `totems-${totemType}` : "relics";
 
-      let uploadedCount = 0;
+      let success = 0;
 
       for (let file of files) {
         const fileName = `${Date.now()}-${file.name}`;
@@ -228,117 +218,109 @@
 
           const { data: urlData } = supabase.storage.from('nfts').getPublicUrl(path);
 
-          const newItem = {
-            title: document.getElementById('nftName').value.trim() || file.name.split('.')[0],
+          const newNFT = {
+            title: document.getElementById('nftName').value.trim() || "Untitled",
             img: urlData.publicUrl,
-            desc: document.getElementById('nftDesc').value.trim() || "No description provided"
+            desc: document.getElementById('nftDesc').value.trim() || "No description"
           };
 
-          if (section === "relics") relicsData.unshift(newItem);
-          else if (section === "totems") {
-            if (document.getElementById('totemType').value === "best") 
-              totemsBestData.unshift(newItem);
-            else 
-              totemsLegendaryData.unshift(newItem);
-          }
+          if (section === "relics") relicsData.unshift(newNFT);
+          else if (totemType === "best") totemsBestData.unshift(newNFT);
+          else totemsLegendaryData.unshift(newNFT);
 
-          uploadedCount++;
-        } catch (err) {
-          console.error(err);
-          alert("Error uploading: " + file.name);
+          success++;
+        } catch (e) {
+          console.error(e);
         }
       }
 
-      if (uploadedCount > 0) {
-        alert(`✅ ${uploadedCount} NFT(s) Uploaded Successfully!`);
+      if (success > 0) {
+        alert(`✅ ${success} NFT(s) Uploaded!`);
         refreshCurrentGallery();
       }
 
       closeUploadModal();
-      document.getElementById('nftName').value = '';
-      document.getElementById('nftDesc').value = '';
-      document.getElementById('imageUpload').value = '';
     }
 
     function refreshCurrentGallery() {
       if (document.getElementById('relics-section').classList.contains('active')) {
         renderGallery('relics-gallery', relicsData);
       } else {
-        const isBest = document.getElementById('bestBtn').classList.contains('active');
-        renderGallery('totems-gallery', isBest ? totemsBestData : totemsLegendaryData);
+        const isBestActive = document.getElementById('bestBtn').classList.contains('active');
+        renderGallery('totems-gallery', isBestActive ? totemsBestData : totemsLegendaryData);
       }
     }
 
-    // Close Modals
     function closeUploadModal() {
       document.getElementById('uploadModal').style.display = "none";
     }
 
-    // Event Listeners
-    let isLoggedIn = false;
+    // ==================== EVENT LISTENERS ====================
+    window.onload = function() {
+      // Login
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        if (isLoggedIn) {
+          isLoggedIn = false;
+          document.getElementById('loginBtn').textContent = "LOGIN";
+          document.getElementById('uploadBtn').style.display = "none";
+          return;
+        }
+        const email = prompt("Enter Email:");
+        const pass = prompt("Enter Password:");
+        if (email === "artaurex@gmail.com" && pass === "Artaurex@1233") {
+          isLoggedIn = true;
+          document.getElementById('loginBtn').textContent = "LOGOUT";
+          document.getElementById('uploadBtn').style.display = "block";
+          alert("✅ Login Successful!");
+        } else {
+          alert("❌ Wrong credentials");
+        }
+      });
 
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      if (isLoggedIn) {
-        isLoggedIn = false;
-        document.getElementById('loginBtn').textContent = "LOGIN";
-        document.getElementById('uploadBtn').style.display = "none";
-        return;
-      }
-      const email = prompt("Enter Email:");
-      const pass = prompt("Enter Password:");
-      if (email === "artaurex@gmail.com" && pass === "Artaurex@1233") {
-        isLoggedIn = true;
-        document.getElementById('loginBtn').textContent = "LOGOUT";
-        document.getElementById('uploadBtn').style.display = "block";
-        alert("✅ Login Successful!");
-      } else {
-        alert("❌ Wrong Email or Password");
-      }
-    });
+      // Upload Button
+      document.getElementById('uploadBtn').addEventListener('click', () => {
+        document.getElementById('uploadModal').style.display = "flex";
+      });
 
-    document.getElementById('uploadBtn').addEventListener('click', () => {
-      document.getElementById('uploadModal').style.display = "flex";
-    });
+      // Section Selector
+      document.getElementById('nftSection').addEventListener('change', function() {
+        document.getElementById('totemType').style.display = this.value === 'totems' ? 'block' : 'none';
+      });
 
-    document.getElementById('nftSection').addEventListener('change', function() {
-      document.getElementById('totemType').style.display = this.value === 'totems' ? 'block' : 'none';
-    });
+      // Navigation
+      document.getElementById('relicsBtn').addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('relicsBtn').classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('relics-section').classList.add('active');
+        renderGallery('relics-gallery', relicsData);
+      });
 
-    // Navigation Buttons (Fixed)
-    document.getElementById('relicsBtn').addEventListener('click', () => {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('relicsBtn').classList.add('active');
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById('relics-section').classList.add('active');
-      renderGallery('relics-gallery', relicsData);
-    });
+      document.getElementById('totemsBtn').addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('totemsBtn').classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('totems-section').classList.add('active');
+        renderGallery('totems-gallery', totemsBestData);
+      });
 
-    document.getElementById('totemsBtn').addEventListener('click', () => {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('totemsBtn').classList.add('active');
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById('totems-section').classList.add('active');
-      renderGallery('totems-gallery', totemsBestData);
-    });
+      document.getElementById('bestBtn').addEventListener('click', () => {
+        document.getElementById('bestBtn').classList.add('active');
+        document.getElementById('legendaryBtn').classList.remove('active');
+        renderGallery('totems-gallery', totemsBestData);
+      });
 
-    document.getElementById('bestBtn').addEventListener('click', () => {
-      document.getElementById('bestBtn').classList.add('active');
-      document.getElementById('legendaryBtn').classList.remove('active');
-      renderGallery('totems-gallery', totemsBestData);
-    });
+      document.getElementById('legendaryBtn').addEventListener('click', () => {
+        document.getElementById('legendaryBtn').classList.add('active');
+        document.getElementById('bestBtn').classList.remove('active');
+        renderGallery('totems-gallery', totemsLegendaryData);
+      });
 
-    document.getElementById('legendaryBtn').addEventListener('click', () => {
-      document.getElementById('legendaryBtn').classList.add('active');
-      document.getElementById('bestBtn').classList.remove('active');
-      renderGallery('totems-gallery', totemsLegendaryData);
-    });
+      document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('modal').style.display = 'none';
+      });
 
-    document.querySelector('.close').addEventListener('click', () => {
-      document.getElementById('modal').style.display = 'none';
-    });
-
-    // Initial Load
-    window.onload = () => {
+      // Initial Render
       renderGallery('relics-gallery', relicsData);
       renderGallery('totems-gallery', totemsBestData);
     };
