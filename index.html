@@ -39,60 +39,70 @@
     }
     .nft-card{
       background:#1d0037; border-radius:12px; overflow:hidden; border:1px solid #440066;
-      position:relative;
     }
     .nft-card img{
       width:100%; aspect-ratio:1/1; object-fit:cover; display:block; cursor:pointer;
     }
 
-    /* Delete Mode Checkbox */
-    .delete-checkbox {
-      position:absolute; top:10px; right:10px; width:24px; height:24px;
-      accent-color:#ff00ff; display:none;
-    }
-
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:16px; padding:20px; } }
 
+    /* ATTRACTIVE UPLOAD MODAL */
     .modal{
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
     }
 
     .modal-content{
-      background:#1a0033; width:100%; max-width:520px; border-radius:24px;
-      padding:25px; position:relative; border:3px solid #ff00ff;
+      background:linear-gradient(160deg, #1f003d, #2d0052);
+      width:100%; max-width:520px; border-radius:28px;
+      padding:40px 30px; position:relative; 
+      border:3px solid #ff00ff;
+      box-shadow:0 0 60px rgba(255, 0, 255, 0.7);
+      animation:modalPop 0.4s ease;
+    }
+
+    @keyframes modalPop{
+      from{ opacity:0; transform:scale(0.6); }
+      to{ opacity:1; transform:scale(1); }
     }
 
     .close{
-      position:absolute; top:15px; right:25px; font-size:42px;
+      position:absolute; top:18px; right:25px; font-size:42px;
       cursor:pointer; color:#ff00ff;
     }
+    .close:hover{ color:#ff66ff; transform:rotate(90deg); }
 
-    /* PREVIEW IMAGE - NORMAL SIZE */
-    .modal-content img{
-      width:100%;
-      max-height:420px;
-      object-fit:contain;
-      border-radius:16px;
-      background:#0a001f;
-      border:2px solid #440066;
+    .modal-content h2{
+      text-align:center; color:#ff00ff; font-size:2.2rem; margin-bottom:30px;
+      text-shadow:0 0 20px #ff00ff;
     }
 
-    .delete-btn{
-      margin-top:15px; width:100%; padding:12px; border:none;
-      border-radius:10px; background:#ff0033; color:white; cursor:pointer;
+    .modal-content input[type="file"]{
+      width:100%; padding:20px; background:rgba(255,255,255,0.08);
+      border:2px dashed #ff00ff; border-radius:18px; color:#fff;
+      cursor:pointer; margin:20px 0; text-align:center;
     }
 
+    .modal-content select{
+      width:100%; padding:16px; margin:12px 0; background:#2a004d;
+      border:none; border-radius:12px; color:white; font-size:1.1rem;
+    }
+
+    /* LOADER */
     .loader-overlay{
       position:fixed; inset:0; background:rgba(0,0,0,0.94);
       display:none; justify-content:center; align-items:center;
       flex-direction:column; z-index:99999;
     }
-    .loader{ width:80px; height:80px; border:7px solid #333; border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite; }
+    .loader{
+      width:80px; height:80px; border:7px solid #333;
+      border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite;
+    }
     @keyframes spin{ 100%{ transform:rotate(360deg); } }
+
     .loader-text{ margin-top:25px; color:#00ffff; font-size:1.5rem; font-weight:bold; }
-    .progress-text{ margin-top:12px; color:#fff; font-size:1.3rem; }
+    .progress-text{ margin-top:12px; color:#fff; font-size:1.35rem; }
   </style>
 </head>
 <body>
@@ -102,7 +112,6 @@
     <div class="header-buttons">
       <button id="loginBtn">LOGIN</button>
       <button id="uploadBtn" style="display:none;">UPLOAD NFT</button>
-      <button id="deleteModeBtn" style="display:none; background:#ff0033; border-color:#ff0033;">DELETE MODE</button>
     </div>
   </header>
 
@@ -142,7 +151,7 @@
         <option value="legendary">Legendary</option>
       </select>
       
-      <div style="margin-top:30px; text-align:center;">
+      <div style="margin-top:35px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
       </div>
@@ -174,8 +183,6 @@
     let totemsBestData = [];
     let totemsLegendaryData = [];
     let isLoggedIn = false;
-    let deleteMode = false;
-    let selectedForDelete = new Set();
 
     async function loadNFTs(){
       const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
@@ -209,105 +216,103 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.className = "nft-card";
-
-        card.innerHTML = `
-          <img src="${item.img}" alt="NFT">
-          <input type="checkbox" class="delete-checkbox" data-id="${item.id}">
-        `;
+        card.innerHTML = `<img src="${item.img}" alt="NFT">`;
 
         card.querySelector("img").onclick = () => {
-          if(!deleteMode){
-            document.getElementById("modalImage").src = item.img;
-            document.getElementById("previewModal").style.display = "flex";
-          }
+          document.getElementById("modalImage").src = item.img;
+          document.getElementById("previewModal").style.display = "flex";
         };
-
-        // Checkbox click handling
-        const checkbox = card.querySelector(".delete-checkbox");
-        checkbox.addEventListener("click", (e) => {
-          e.stopPropagation();
-          if(checkbox.checked){
-            selectedForDelete.add(item.id);
-          } else {
-            selectedForDelete.delete(item.id);
-          }
-        });
-
         container.appendChild(card);
       });
     }
 
-    // Bulk Delete
-    async function deleteSelected(){
-      if(selectedForDelete.size === 0) return alert("No items selected");
+    async function uploadNFTs(){
+      const files = document.getElementById("imageUpload").files;
+      if(files.length === 0) return alert("Please select at least one image");
 
-      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s) permanently?`)) return;
+      document.getElementById("loader").style.display = "flex";
+      document.getElementById("loaderText").innerText = "Uploading NFTs...";
+      document.getElementById("progressText").innerText = `0/${files.length}`;
 
-      for(let id of selectedForDelete){
-        await supabaseClient.from("nfts_data").delete().eq("id", id);
+      const section = document.getElementById("nftSection").value;
+      const totemType = document.getElementById("totemType").value;
+
+      let uploadedCount = 0;
+
+      for(let i = 0; i < files.length; i++){
+        const file = files[i];
+        try{
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
+          const path = `${section}/${fileName}`;
+
+          await supabaseClient.storage.from("nfts").upload(path, file, { upsert: true });
+          const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
+
+          await supabaseClient.from("nfts_data").insert([{
+            title: "Untitled",
+            description: "",
+            img: urlData.publicUrl,
+            section: section,
+            type: totemType || null
+          }]);
+
+          uploadedCount++;
+          document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
+        } catch(err){ console.log(err); }
       }
 
-      alert("Selected NFTs Deleted Successfully");
-      selectedForDelete.clear();
-      deleteMode = false;
-      document.getElementById("deleteModeBtn").innerText = "DELETE MODE";
+      document.getElementById("loaderText").innerText = "✅ Upload Complete!";
+      document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
+
       await loadNFTs();
+
+      setTimeout(() => {
+        document.getElementById("loader").style.display = "none";
+        closeUploadModal();
+      }, 2000);
+    }
+
+    function closeUploadModal(){
+      document.getElementById("uploadModal").style.display = "none";
     }
 
     // Login
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
-        deleteMode = false;
         document.getElementById("loginBtn").innerText = "LOGIN";
         document.getElementById("uploadBtn").style.display = "none";
-        document.getElementById("deleteModeBtn").style.display = "none";
         loadNFTs();
         alert("Logged Out");
         return;
       }
-
       const secret = prompt("Enter Secret Word");
       if(secret === "tmkc" || secret === "Tmkc"){
         isLoggedIn = true;
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
-        document.getElementById("deleteModeBtn").style.display = "block";
         loadNFTs();
         alert("Login Successful");
       } else alert("Wrong Secret Word");
     });
 
-    // Delete Mode Toggle
-    document.getElementById("deleteModeBtn").addEventListener("click", () => {
-      deleteMode = !deleteMode;
-      document.getElementById("deleteModeBtn").innerText = deleteMode ? "EXIT DELETE MODE" : "DELETE MODE";
-      document.getElementById("deleteModeBtn").style.background = deleteMode ? "#00ff00" : "#ff0033";
-
-      // Show/hide all checkboxes
-      document.querySelectorAll(".delete-checkbox").forEach(cb => {
-        cb.style.display = deleteMode ? "block" : "none";
-      });
-
-      if(!deleteMode) selectedForDelete.clear();
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+      document.getElementById("uploadModal").style.display = "flex";
     });
-
-    // Rest of the code (Upload, Preview, etc.)
-    document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
 
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
     });
 
     document.getElementById("closePreview").onclick = () => document.getElementById("previewModal").style.display = "none";
-    document.getElementById("closeUpload").onclick = () => document.getElementById("uploadModal").style.display = "none";
+    document.getElementById("closeUpload").onclick = closeUploadModal;
 
     window.onclick = (e) => {
       if(e.target.id === "previewModal") document.getElementById("previewModal").style.display = "none";
-      if(e.target.id === "uploadModal") document.getElementById("uploadModal").style.display = "none";
+      if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation (same as before)
+    // Navigation
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
