@@ -47,7 +47,6 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:10px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
 
-    /* MODAL STYLES */
     .modal{
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
@@ -65,15 +64,9 @@
     }
     .close:hover{ color:#ff66ff; }
 
-    /* PREVIEW MODAL IMPROVEMENTS */
     .modal-content img{
-      width:100%;
-      max-height:480px;
-      object-fit:contain;
-      border-radius:16px;
-      margin-bottom:20px;
-      border:2px solid #440066;
-      background:#0a001f;
+      width:100%; max-height:480px; object-fit:contain; border-radius:16px;
+      margin-bottom:20px; border:2px solid #440066; background:#0a001f;
     }
 
     .modal-content h2{
@@ -86,7 +79,6 @@
       padding:0 10px; min-height:80px;
     }
 
-    /* Edit Fields */
     .modal-content input,
     .modal-content textarea{
       width:100%; padding:12px; margin:12px 0; border:none;
@@ -94,23 +86,6 @@
     }
 
     .modal-content textarea{ min-height:120px; resize:vertical; }
-
-    .delete-btn{
-      margin-top:15px; width:100%; padding:12px; border:none;
-      border-radius:10px; background:#ff0033; color:white; cursor:pointer;
-    }
-
-    .loader-overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,0.92);
-      display:none; justify-content:center; align-items:center;
-      flex-direction:column; z-index:99999;
-    }
-    .loader{
-      width:80px; height:80px; border:7px solid #333;
-      border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite;
-    }
-    @keyframes spin{ 100%{ transform:rotate(360deg); } }
-    .loader-text{ margin-top:20px; color:#00ffff; font-size:1.3rem; font-weight:bold; }
   </style>
 </head>
 <body>
@@ -164,17 +139,15 @@
     </div>
   </div>
 
-  <!-- PREVIEW MODAL (UPDATED) -->
+  <!-- PREVIEW MODAL -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
       
       <img id="modalImage" src="" alt="NFT Image">
-      
       <h2 id="modalTitleDisplay"></h2>
       <p id="modalDesc"></p>
 
-      <!-- ADMIN EDIT -->
       <input type="text" id="editTitle" placeholder="NFT Name" style="display:none;"/>
       <textarea id="editDesc" rows="5" placeholder="Description" style="display:none;"></textarea>
       
@@ -202,7 +175,7 @@
     let isLoggedIn = false;
     let currentNFT = null;
 
-    // SAVE CHANGES
+    // ====================== SAVE CHANGES (FIXED) ======================
     document.getElementById("saveBtn").addEventListener("click", async () => {
       if (!currentNFT) return;
 
@@ -216,24 +189,27 @@
 
       const { error } = await supabaseClient
         .from("nfts_data")
-        .update({ title: newTitle, description: newDesc })
+        .update({ 
+          title: newTitle, 
+          description: newDesc 
+        })
         .eq("id", currentNFT.id);
 
       if (error) {
         console.error(error);
-        alert("Save Failed!");
+        alert("Save Failed! Error: " + error.message);
         return;
       }
 
       alert("✅ Changes Saved Successfully!");
 
-      currentNFT.title = newTitle;
-      currentNFT.desc = newDesc;
-
-      document.getElementById("modalTitleDisplay").innerText = newTitle;
-      document.getElementById("modalDesc").innerText = newDesc || "No description";
-
+      // Force full refresh
       await loadNFTs();
+
+      // Close modal after save
+      setTimeout(() => {
+        document.getElementById("previewModal").style.display = "none";
+      }, 800);
     });
 
     async function loadNFTs(){
@@ -300,7 +276,6 @@
       currentNFT = item;
 
       document.getElementById("previewModal").style.display = "flex";
-      
       document.getElementById("modalImage").src = item.img;
       document.getElementById("modalTitleDisplay").innerText = item.title;
       document.getElementById("modalDesc").innerText = item.desc || "No description provided.";
@@ -355,11 +330,7 @@
           const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
 
           await supabaseClient.from("nfts_data").insert([{
-            title: title,
-            description: desc,
-            img: urlData.publicUrl,
-            section: section,
-            type: totemType
+            title, description: desc, img: urlData.publicUrl, section, type: totemType
           }]);
           uploadedCount++;
         } catch(err){ console.log(err); }
@@ -370,16 +341,15 @@
 
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
-        document.getElementById("loaderText").innerText = "Uploading NFT...";
         closeUploadModal();
-      }, 1800);
+      }, 1500);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    // Login
+    // Login and Navigation (same)
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -399,9 +369,8 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Event Listeners
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
-    
+
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
     });
@@ -414,7 +383,7 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
