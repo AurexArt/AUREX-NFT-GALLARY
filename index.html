@@ -47,34 +47,35 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
 
-    /* MODAL */
     .modal{
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
     }
 
     .modal-content{
-      background:#1a0033; width:100%; max-width:700px; border-radius:20px;
-      padding:20px; position:relative; border:3px solid #ff00ff;
-      box-shadow:0 0 40px rgba(255, 0, 255, 0.4);
+      background:#1a0033; width:100%; max-width:520px; border-radius:24px;
+      padding:30px; position:relative; border:3px solid #ff00ff;
+      box-shadow:0 0 40px rgba(255, 0, 255, 0.5);
     }
 
     .close{
-      position:absolute; top:12px; right:20px; font-size:40px;
+      position:absolute; top:15px; right:20px; font-size:42px;
       cursor:pointer; color:#ff00ff;
     }
     .close:hover{ color:#ff66ff; }
 
+    /* PREVIEW IMAGE - BALANCED SIZE */
     .modal-content img{
       width:100%;
-      max-height:85vh;
+      max-height:460px;
       object-fit:contain;
-      border-radius:12px;
+      border-radius:16px;
       background:#0a001f;
+      border:2px solid #440066;
     }
 
     .delete-btn{
-      margin-top:12px; width:100%; padding:12px; border:none;
+      margin-top:15px; width:100%; padding:12px; border:none;
       border-radius:10px; background:#ff0033; color:white; cursor:pointer;
     }
 
@@ -88,7 +89,13 @@
       border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite;
     }
     @keyframes spin{ 100%{ transform:rotate(360deg); } }
-    .loader-text{ margin-top:20px; color:#00ffff; font-size:1.3rem; font-weight:bold; }
+
+    .loader-text{
+      margin-top:20px; color:#00ffff; font-size:1.4rem; font-weight:bold;
+    }
+    .progress-text{
+      margin-top:15px; color:#fff; font-size:1.2rem;
+    }
   </style>
 </head>
 <body>
@@ -119,33 +126,44 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- UPLOAD MODAL (Simple) -->
+  <!-- UPLOAD MODAL -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2 style="text-align:center; color:#ff00ff; margin-bottom:20px;">UPLOAD NFT</h2>
+      <h2>✦ UPLOAD NFT ✦</h2>
       
-      <input type="file" id="imageUpload" accept="image/*" multiple style="width:100%; padding:12px; background:#2a004d; border-radius:12px;"/>
+      <input type="file" id="imageUpload" accept="image/*" multiple/>
       
-      <div style="margin-top:25px; text-align:center;">
+      <select id="nftSection">
+        <option value="relics">Relics</option>
+        <option value="totems">Totems</option>
+      </select>
+      
+      <select id="totemType" style="display:none;">
+        <option value="best">Best</option>
+        <option value="legendary">Legendary</option>
+      </select>
+      
+      <div style="margin-top:30px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
       </div>
     </div>
   </div>
 
-  <!-- PREVIEW MODAL (Sirf Image) -->
+  <!-- IMAGE PREVIEW MODAL -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
-      <img id="modalImage" src="" alt="NFT">
+      <img id="modalImage" src="" alt="NFT Image">
     </div>
   </div>
 
   <!-- LOADER -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Uploading NFT...</div>
+    <div class="loader-text" id="loaderText">Uploading...</div>
+    <div class="progress-text" id="progressText">0/0</div>
   </div>
 
   <script>
@@ -160,25 +178,14 @@
     let isLoggedIn = false;
 
     async function loadNFTs(){
-      const { data, error } = await supabaseClient
-        .from("nfts_data")
-        .select("*")
-        .order("id", { ascending: false });
-
-      if (error) { console.log(error); return; }
+      const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
 
       relicsData = [];
       totemsBestData = [];
       totemsLegendaryData = [];
 
       data.forEach(item => {
-        const nft = {
-          id: item.id,
-          img: item.img,
-          section: item.section,
-          type: item.type
-        };
-
+        const nft = { id: item.id, img: item.img, section: item.section, type: item.type };
         if (item.section === "relics") relicsData.push(nft);
         else if (item.section === "totems") {
           if (item.type === "best") totemsBestData.push(nft);
@@ -216,7 +223,6 @@
           document.getElementById("modalImage").src = item.img;
           document.getElementById("previewModal").style.display = "flex";
         };
-
         container.appendChild(card);
       });
     }
@@ -229,14 +235,19 @@
 
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select image(s)");
+      if(files.length === 0) return alert("Please select at least one image");
 
       document.getElementById("loader").style.display = "flex";
+      document.getElementById("loaderText").innerText = "Uploading...";
+      document.getElementById("progressText").innerText = `0/${files.length}`;
 
-      const section = document.getElementById("nftSection") ? document.getElementById("nftSection").value : "relics";
+      const section = document.getElementById("nftSection").value;
+      const totemType = document.getElementById("totemType").value;
+
       let uploadedCount = 0;
 
-      for(let file of files){
+      for(let i = 0; i < files.length; i++){
+        const file = files[i];
         try{
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
           const path = `${section}/${fileName}`;
@@ -249,31 +260,32 @@
             description: "",
             img: urlData.publicUrl,
             section: section,
-            type: "best"
+            type: totemType || null
           }]);
+
           uploadedCount++;
-        } catch(err){ console.log(err); }
+          document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
+        } catch(err){
+          console.log(err);
+        }
       }
 
-      document.getElementById("loaderText").innerText = `${uploadedCount} Image(s) Uploaded`;
+      document.getElementById("loaderText").innerText = "✅ Upload Complete";
+      document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
+
       await loadNFTs();
 
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
-        document.getElementById("loaderText").innerText = "Uploading NFT...";
         closeUploadModal();
-      }, 1500);
+      }, 2000);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    function closePreview(){
-      document.getElementById("previewModal").style.display = "none";
-    }
-
-    // Login
+    // Login, Navigation, etc.
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -297,15 +309,19 @@
       document.getElementById("uploadModal").style.display = "flex";
     });
 
-    document.getElementById("closePreview").onclick = closePreview;
+    document.getElementById("nftSection").addEventListener("change", function(){
+      document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
+    });
+
+    document.getElementById("closePreview").onclick = () => document.getElementById("previewModal").style.display = "none";
     document.getElementById("closeUpload").onclick = closeUploadModal;
 
     window.onclick = (e) => {
-      if(e.target.id === "previewModal") closePreview();
+      if(e.target.id === "previewModal") document.getElementById("previewModal").style.display = "none";
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
