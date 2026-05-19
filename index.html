@@ -53,25 +53,20 @@
     }
 
     .modal-content{
-      background:#1a0033; width:100%; max-width:520px; border-radius:24px;
-      padding:30px; position:relative; border:3px solid #ff00ff;
-      box-shadow:0 0 40px rgba(255, 0, 255, 0.5);
+      background:#1a0033; width:100%; max-width:520px; border-radius:28px;
+      padding:35px 30px; position:relative; border:3px solid #ff00ff;
+      box-shadow:0 0 50px rgba(255, 0, 255, 0.6);
     }
 
     .close{
-      position:absolute; top:15px; right:20px; font-size:42px;
+      position:absolute; top:15px; right:25px; font-size:42px;
       cursor:pointer; color:#ff00ff;
     }
-    .close:hover{ color:#ff66ff; }
+    .close:hover{ color:#ff66ff; transform:rotate(90deg); }
 
-    /* PREVIEW IMAGE - BALANCED SIZE */
     .modal-content img{
-      width:100%;
-      max-height:460px;
-      object-fit:contain;
-      border-radius:16px;
-      background:#0a001f;
-      border:2px solid #440066;
+      width:100%; max-height:460px; object-fit:contain; border-radius:16px;
+      background:#0a001f; border:2px solid #440066;
     }
 
     .delete-btn{
@@ -80,7 +75,7 @@
     }
 
     .loader-overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,0.92);
+      position:fixed; inset:0; background:rgba(0,0,0,0.94);
       display:none; justify-content:center; align-items:center;
       flex-direction:column; z-index:99999;
     }
@@ -90,12 +85,8 @@
     }
     @keyframes spin{ 100%{ transform:rotate(360deg); } }
 
-    .loader-text{
-      margin-top:20px; color:#00ffff; font-size:1.4rem; font-weight:bold;
-    }
-    .progress-text{
-      margin-top:15px; color:#fff; font-size:1.2rem;
-    }
+    .loader-text{ margin-top:25px; color:#00ffff; font-size:1.5rem; font-weight:bold; }
+    .progress-text{ margin-top:12px; color:#fff; font-size:1.3rem; }
   </style>
 </head>
 <body>
@@ -130,7 +121,7 @@
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2>✦ UPLOAD NFT ✦</h2>
+      <h2>✦ UPLOAD NEW NFT ✦</h2>
       
       <input type="file" id="imageUpload" accept="image/*" multiple/>
       
@@ -151,7 +142,7 @@
     </div>
   </div>
 
-  <!-- IMAGE PREVIEW MODAL -->
+  <!-- PREVIEW MODAL -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
@@ -162,7 +153,7 @@
   <!-- LOADER -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Uploading...</div>
+    <div class="loader-text" id="loaderText">Uploading NFTs...</div>
     <div class="progress-text" id="progressText">0/0</div>
   </div>
 
@@ -227,15 +218,41 @@
       });
     }
 
+    // ====================== DELETE FROM BOTH DB + STORAGE ======================
     async function deleteNFT(id){
-      if(!confirm("Delete this NFT?")) return;
-      await supabaseClient.from("nfts_data").delete().eq("id", id);
-      await loadNFTs();
+      if(!confirm("Delete this NFT permanently from everywhere?")) return;
+
+      try {
+        // Pehle database se image URL le lo
+        const { data: nft } = await supabaseClient
+          .from("nfts_data")
+          .select("img")
+          .eq("id", id)
+          .single();
+
+        if(nft && nft.img){
+          // Storage se delete
+          const imagePath = nft.img.split("/nfts/")[1];
+          if(imagePath){
+            await supabaseClient.storage.from("nfts").remove([imagePath]);
+          }
+        }
+
+        // Database se delete
+        await supabaseClient.from("nfts_data").delete().eq("id", id);
+
+        alert("NFT Deleted Successfully");
+        await loadNFTs();
+      } catch(err){
+        console.error(err);
+        alert("Delete Failed");
+      }
     }
 
+    // ====================== UPLOAD WITH PROGRESS ======================
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select at least one image");
+      if(files.length === 0) return alert("Please select images");
 
       document.getElementById("loader").style.display = "flex";
       document.getElementById("loaderText").innerText = "Uploading...";
@@ -270,7 +287,7 @@
         }
       }
 
-      document.getElementById("loaderText").innerText = "✅ Upload Complete";
+      document.getElementById("loaderText").innerText = "✅ Upload Complete!";
       document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
 
       await loadNFTs();
@@ -278,14 +295,14 @@
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         closeUploadModal();
-      }, 2000);
+      }, 1800);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    // Login, Navigation, etc.
+    // Login, Navigation, etc. (same)
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -305,9 +322,7 @@
       } else alert("Wrong Secret Word");
     });
 
-    document.getElementById("uploadBtn").addEventListener("click", () => {
-      document.getElementById("uploadModal").style.display = "flex";
-    });
+    document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
 
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
