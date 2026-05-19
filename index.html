@@ -47,6 +47,7 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:10px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
 
+    /* MODAL */
     .modal{
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
@@ -64,19 +65,25 @@
     }
     .close:hover{ color:#ff66ff; }
 
+    /* PREVIEW MODAL - FIXED SIZING */
     .modal-content img{
-      width:100%; max-height:480px; object-fit:contain; border-radius:16px;
-      margin-bottom:20px; border:2px solid #440066; background:#0a001f;
+      width:100%;
+      max-height:460px;
+      object-fit:contain;
+      border-radius:16px;
+      margin-bottom:20px;
+      border:2px solid #440066;
+      background:#0a001f;
     }
 
     .modal-content h2{
-      text-align:center; color:#ff00ff; font-size:1.8rem; margin-bottom:12px;
+      text-align:center; color:#ff00ff; font-size:1.75rem; margin-bottom:12px;
       text-shadow:0 0 10px #ff00ff;
     }
 
     .modal-content p{
-      text-align:center; color:#ddd; line-height:1.6; font-size:1.05rem;
-      padding:0 10px; min-height:80px;
+      text-align:center; color:#ddd; line-height:1.65; font-size:1.05rem;
+      padding:0 15px; min-height:90px;
     }
 
     .modal-content input,
@@ -85,7 +92,7 @@
       border-radius:12px; background:#2a004d; color:white;
     }
 
-    .modal-content textarea{ min-height:120px; resize:vertical; }
+    .modal-content textarea{ min-height:130px; resize:vertical; }
   </style>
 </head>
 <body>
@@ -175,41 +182,35 @@
     let isLoggedIn = false;
     let currentNFT = null;
 
-    // ====================== SAVE CHANGES (FIXED) ======================
+    // ====================== SAVE FUNCTION (STRONGER FIX) ======================
     document.getElementById("saveBtn").addEventListener("click", async () => {
       if (!currentNFT) return;
 
       const newTitle = document.getElementById("editTitle").value.trim();
       const newDesc = document.getElementById("editDesc").value.trim();
 
-      if (!newTitle) {
-        alert("NFT Name cannot be empty!");
-        return;
-      }
+      if (!newTitle) return alert("NFT Name cannot be empty!");
 
       const { error } = await supabaseClient
         .from("nfts_data")
-        .update({ 
-          title: newTitle, 
-          description: newDesc 
-        })
+        .update({ title: newTitle, description: newDesc })
         .eq("id", currentNFT.id);
 
       if (error) {
         console.error(error);
-        alert("Save Failed! Error: " + error.message);
+        alert("Save Failed!");
         return;
       }
 
       alert("✅ Changes Saved Successfully!");
 
-      // Force full refresh
+      // Full Refresh
       await loadNFTs();
 
-      // Close modal after save
+      // Close modal
       setTimeout(() => {
         document.getElementById("previewModal").style.display = "none";
-      }, 800);
+      }, 600);
     });
 
     async function loadNFTs(){
@@ -349,7 +350,7 @@
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    // Login and Navigation (same)
+    // Login & Navigation
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -383,7 +384,6 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
