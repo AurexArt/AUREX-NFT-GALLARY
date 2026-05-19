@@ -53,7 +53,6 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:16px; padding:20px; } }
 
-    /* MODALS */
     .modal{
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
@@ -72,14 +71,9 @@
     }
     .close:hover{ color:#ff66ff; transform:rotate(90deg); }
 
-    /* Preview Image - Normal Size */
     .modal-content img{
-      width:100%;
-      max-height:420px;
-      object-fit:contain;
-      border-radius:16px;
-      background:#0a001f;
-      border:2px solid #440066;
+      width:100%; max-height:420px; object-fit:contain; border-radius:16px;
+      background:#0a001f; border:2px solid #440066;
     }
 
     .loader-overlay{
@@ -126,7 +120,7 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- UPLOAD MODAL -->
+  <!-- ATTRACTIVE UPLOAD MODAL -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
@@ -236,17 +230,18 @@
 
     // Bulk Delete
     async function deleteSelected(){
-      if(selectedForDelete.size === 0) return alert("No items selected");
-      if(!confirm(`Delete ${selectedForDelete.size} selected NFTs?`)) return;
+      if(selectedForDelete.size === 0) return alert("No items selected!");
+      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s)?`)) return;
 
       for(let id of selectedForDelete){
         await supabaseClient.from("nfts_data").delete().eq("id", id);
       }
 
-      alert("Selected NFTs Deleted");
+      alert("Selected NFTs Deleted Successfully!");
       selectedForDelete.clear();
       deleteMode = false;
       document.getElementById("deleteModeBtn").innerText = "DELETE MODE";
+      document.getElementById("deleteModeBtn").style.background = "#ff0033";
       await loadNFTs();
     }
 
@@ -320,18 +315,23 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Delete Mode
+    // Delete Mode Button
     document.getElementById("deleteModeBtn").addEventListener("click", () => {
       deleteMode = !deleteMode;
       const btn = document.getElementById("deleteModeBtn");
-      btn.innerText = deleteMode ? "EXIT DELETE MODE" : "DELETE MODE";
-      btn.style.background = deleteMode ? "#00ff00" : "#ff0033";
+      
+      if(deleteMode){
+        btn.innerText = "DELETE SELECTED";
+        btn.style.background = "#ff0033";
+      } else {
+        btn.innerText = "DELETE MODE";
+        btn.style.background = "#ff0033";
+        selectedForDelete.clear();
+      }
 
       document.querySelectorAll(".delete-checkbox").forEach(cb => {
         cb.style.display = deleteMode ? "block" : "none";
       });
-
-      if(!deleteMode) selectedForDelete.clear();
     });
 
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
