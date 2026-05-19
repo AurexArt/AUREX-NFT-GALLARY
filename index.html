@@ -98,7 +98,7 @@
     <div class="header-buttons">
       <button id="loginBtn">LOGIN</button>
       <button id="uploadBtn" style="display:none;">UPLOAD NFT</button>
-      <button id="deleteModeBtn" style="display:none; background:#ff0033; border-color:#ff0033;">DELETE MODE</button>
+      <button id="deleteModeBtn" style="display:none; background:#ff0033;">DELETE MODE</button>
     </div>
   </header>
 
@@ -120,7 +120,7 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- ATTRACTIVE UPLOAD MODAL -->
+  <!-- UPLOAD MODAL -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
@@ -220,18 +220,22 @@
         const checkbox = card.querySelector(".delete-checkbox");
         checkbox.addEventListener("click", (e) => {
           e.stopPropagation();
-          if(checkbox.checked) selectedForDelete.add(item.id);
-          else selectedForDelete.delete(item.id);
+          if(checkbox.checked){
+            selectedForDelete.add(item.id);
+          } else {
+            selectedForDelete.delete(item.id);
+          }
         });
 
         container.appendChild(card);
       });
     }
 
-    // Bulk Delete
+    // ====================== DELETE SELECTED ======================
     async function deleteSelected(){
-      if(selectedForDelete.size === 0) return alert("No items selected!");
-      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s)?`)) return;
+      if(selectedForDelete.size === 0) return alert("No images selected!");
+
+      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s) permanently?`)) return;
 
       for(let id of selectedForDelete){
         await supabaseClient.from("nfts_data").delete().eq("id", id);
@@ -315,11 +319,11 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Delete Mode Button
+    // Delete Mode Button Logic
     document.getElementById("deleteModeBtn").addEventListener("click", () => {
       deleteMode = !deleteMode;
       const btn = document.getElementById("deleteModeBtn");
-      
+
       if(deleteMode){
         btn.innerText = "DELETE SELECTED";
         btn.style.background = "#ff0033";
