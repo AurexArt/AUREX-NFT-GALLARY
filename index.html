@@ -56,14 +56,13 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:15px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:18px; padding:25px; } }
 
-    /* MODALS */
     .modal{
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
     }
 
     .modal-content{
-      background:#1a0033; width:100%; max-width:650px; border-radius:24px;
+      background:#1a0033; width:100%; max-width:560px; border-radius:24px;
       padding:25px; position:relative; border:3px solid #ff00ff;
       box-shadow:0 0 50px rgba(255, 0, 255, 0.6);
     }
@@ -133,8 +132,15 @@
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2 style="text-align:center; color:#ff00ff; margin-bottom:25px;">✦ UPLOAD NEW NFT ✦</h2>
-      <input type="file" id="imageUpload" accept="image/*" multiple style="width:100%; padding:15px; background:#2a004d; border-radius:12px;"/>
+      <h2 style="text-align:center; color:#ff00ff; margin-bottom:20px;">✦ UPLOAD NEW NFT ✦</h2>
+      
+      <select id="nftSection" style="width:100%; padding:12px; margin:10px 0; background:#2a004d; border-radius:12px; color:white;">
+        <option value="relics">Relics</option>
+        <option value="totems">Totems</option>
+      </select>
+      
+      <input type="file" id="imageUpload" accept="image/*" multiple style="width:100%; padding:12px; background:#2a004d; border-radius:12px; margin:10px 0;"/>
+
       <div style="margin-top:25px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
@@ -142,7 +148,7 @@
     </div>
   </div>
 
-  <!-- PREVIEW MODAL (Only Image) -->
+  <!-- PREVIEW MODAL (Sirf Image) -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
@@ -242,13 +248,15 @@
       const files = document.getElementById("imageUpload").files;
       if(files.length === 0) return alert("Please select images");
 
+      const section = document.getElementById("nftSection").value;
+
       document.getElementById("loader").style.display = "flex";
 
       let count = 0;
       for(let file of files){
         try{
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
-          const path = `relics/${fileName}`;
+          const path = `${section}/${fileName}`;
 
           await supabaseClient.storage.from("nfts").upload(path, file, { upsert: true });
           const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
@@ -257,7 +265,7 @@
             title: "Untitled",
             description: "",
             img: urlData.publicUrl,
-            section: "relics",
+            section: section,
             type: "best"
           }]);
           count++;
@@ -282,7 +290,7 @@
       document.getElementById("previewModal").style.display = "none";
     }
 
-    // LOGIN
+    // Login
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -302,7 +310,6 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Event Listeners
     document.getElementById("uploadBtn").addEventListener("click", () => {
       document.getElementById("uploadModal").style.display = "flex";
     });
@@ -344,7 +351,6 @@
       renderGallery("totems-gallery", totemsLegendaryData);
     });
 
-    // Initial Load
     loadNFTs();
   </script>
 </body>
