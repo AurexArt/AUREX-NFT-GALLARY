@@ -35,16 +35,16 @@
     }
 
     .gallery{
-      width:100%; padding:8px; display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+      width:100%; padding:8px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
     }
     .nft-card{
-      background:#1d0037; border-radius:10px; overflow:hidden; border:1px solid #440066;
+      background:#1d0037; border-radius:12px; overflow:hidden; border:1px solid #440066;
     }
     .nft-card img{
       width:100%; aspect-ratio:1/1; object-fit:cover; display:block; cursor:pointer;
     }
 
-    @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:10px; } }
+    @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
 
     .modal{
@@ -64,17 +64,37 @@
     }
     .close:hover{ color:#ff66ff; }
 
-    .modal-content h2{
-      text-align:center; color:#ff00ff; margin-bottom:25px; font-size:1.9rem;
+    /* PREVIEW IMAGE - BALANCED SIZE */
+    .modal-content img{
+      width:100%;
+      max-height:460px;
+      object-fit:contain;
+      border-radius:16px;
+      background:#0a001f;
+      border:2px solid #440066;
     }
 
-    .modal-content input[type="file"]{
-      width:100%; padding:12px; background:#2a004d; border-radius:12px; color:white;
+    .delete-btn{
+      margin-top:15px; width:100%; padding:12px; border:none;
+      border-radius:10px; background:#ff0033; color:white; cursor:pointer;
     }
 
-    .modal-content select{
-      width:100%; padding:14px; margin:12px 0; background:#2a004d;
-      border:none; border-radius:12px; color:white;
+    .loader-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.92);
+      display:none; justify-content:center; align-items:center;
+      flex-direction:column; z-index:99999;
+    }
+    .loader{
+      width:80px; height:80px; border:7px solid #333;
+      border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite;
+    }
+    @keyframes spin{ 100%{ transform:rotate(360deg); } }
+
+    .loader-text{
+      margin-top:20px; color:#00ffff; font-size:1.4rem; font-weight:bold;
+    }
+    .progress-text{
+      margin-top:15px; color:#fff; font-size:1.2rem;
     }
   </style>
 </head>
@@ -106,7 +126,7 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- SIMPLE UPLOAD MODAL -->
+  <!-- UPLOAD MODAL -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
@@ -131,18 +151,19 @@
     </div>
   </div>
 
-  <!-- SIMPLE IMAGE PREVIEW -->
+  <!-- IMAGE PREVIEW MODAL -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
-      <img id="modalImage" src="" alt="NFT">
+      <img id="modalImage" src="" alt="NFT Image">
     </div>
   </div>
 
   <!-- LOADER -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Uploading NFT...</div>
+    <div class="loader-text" id="loaderText">Uploading...</div>
+    <div class="progress-text" id="progressText">0/0</div>
   </div>
 
   <script>
@@ -214,16 +235,19 @@
 
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select image(s)");
+      if(files.length === 0) return alert("Please select at least one image");
 
       document.getElementById("loader").style.display = "flex";
+      document.getElementById("loaderText").innerText = "Uploading...";
+      document.getElementById("progressText").innerText = `0/${files.length}`;
 
       const section = document.getElementById("nftSection").value;
       const totemType = document.getElementById("totemType").value;
 
-      let count = 0;
+      let uploadedCount = 0;
 
-      for(let file of files){
+      for(let i = 0; i < files.length; i++){
+        const file = files[i];
         try{
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
           const path = `${section}/${fileName}`;
@@ -238,24 +262,30 @@
             section: section,
             type: totemType || null
           }]);
-          count++;
-        } catch(e){ console.log(e); }
+
+          uploadedCount++;
+          document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
+        } catch(err){
+          console.log(err);
+        }
       }
 
-      document.getElementById("loaderText").innerText = `${count} NFT(s) Uploaded`;
+      document.getElementById("loaderText").innerText = "✅ Upload Complete";
+      document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
+
       await loadNFTs();
 
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         closeUploadModal();
-      }, 1500);
+      }, 2000);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    // Login
+    // Login, Navigation, etc.
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -275,7 +305,6 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Event Listeners
     document.getElementById("uploadBtn").addEventListener("click", () => {
       document.getElementById("uploadModal").style.display = "flex";
     });
@@ -292,7 +321,7 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
