@@ -220,32 +220,47 @@
         const checkbox = card.querySelector(".delete-checkbox");
         checkbox.addEventListener("click", (e) => {
           e.stopPropagation();
-          if(checkbox.checked){
-            selectedForDelete.add(item.id);
-          } else {
-            selectedForDelete.delete(item.id);
-          }
+          if(checkbox.checked) selectedForDelete.add(item.id);
+          else selectedForDelete.delete(item.id);
         });
 
         container.appendChild(card);
       });
     }
 
-    // ====================== DELETE SELECTED ======================
+    // ====================== BULK DELETE FROM DB + STORAGE ======================
     async function deleteSelected(){
       if(selectedForDelete.size === 0) return alert("No images selected!");
 
-      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s) permanently?`)) return;
+      if(!confirm(`Delete ${selectedForDelete.size} selected NFT(s) from everywhere?`)) return;
 
       for(let id of selectedForDelete){
-        await supabaseClient.from("nfts_data").delete().eq("id", id);
+        try {
+          // Get image URL
+          const { data: nft } = await supabaseClient
+            .from("nfts_data")
+            .select("img")
+            .eq("id", id)
+            .single();
+
+          if(nft && nft.img){
+            const imagePath = nft.img.split("/nfts/")[1];
+            if(imagePath){
+              await supabaseClient.storage.from("nfts").remove([imagePath]);
+            }
+          }
+
+          // Delete from database
+          await supabaseClient.from("nfts_data").delete().eq("id", id);
+        } catch(err){
+          console.log("Error deleting ID", id, err);
+        }
       }
 
-      alert("Selected NFTs Deleted Successfully!");
+      alert("Selected NFTs Deleted Successfully from Database & Storage!");
       selectedForDelete.clear();
       deleteMode = false;
       document.getElementById("deleteModeBtn").innerText = "DELETE MODE";
-      document.getElementById("deleteModeBtn").style.background = "#ff0033";
       await loadNFTs();
     }
 
@@ -319,11 +334,11 @@
       } else alert("Wrong Secret Word");
     });
 
-    // Delete Mode Button Logic
+    // Delete Mode
     document.getElementById("deleteModeBtn").addEventListener("click", () => {
       deleteMode = !deleteMode;
       const btn = document.getElementById("deleteModeBtn");
-
+      
       if(deleteMode){
         btn.innerText = "DELETE SELECTED";
         btn.style.background = "#ff0033";
@@ -352,7 +367,7 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
+    // Navigation (same)
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
