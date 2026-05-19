@@ -47,65 +47,46 @@
     @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
     @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
 
-    /* ==================== STYLISH UPLOAD MODAL ==================== */
     .modal{
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96);
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
       z-index:1000; justify-content:center; align-items:center; padding:20px;
     }
 
     .modal-content{
-      background:linear-gradient(145deg, #1f003d, #2a004d);
-      width:100%; max-width:520px; border-radius:28px;
-      padding:35px 30px; position:relative; 
-      border:3px solid #ff00ff;
+      background:#1a0033; width:100%; max-width:520px; border-radius:28px;
+      padding:35px 30px; position:relative; border:3px solid #ff00ff;
       box-shadow:0 0 50px rgba(255, 0, 255, 0.6);
-      animation:modalPop 0.4s ease;
-    }
-
-    @keyframes modalPop{
-      from{ opacity:0; transform:scale(0.6); }
-      to{ opacity:1; transform:scale(1); }
     }
 
     .close{
       position:absolute; top:15px; right:25px; font-size:42px;
-      cursor:pointer; color:#ff00ff; transition:0.3s;
+      cursor:pointer; color:#ff00ff;
     }
     .close:hover{ color:#ff66ff; transform:rotate(90deg); }
 
-    .modal-content h2{
-      text-align:center; color:#ff00ff; font-size:2.2rem; margin-bottom:30px;
-      text-shadow:0 0 20px #ff00ff;
-      letter-spacing:2px;
+    .modal-content img{
+      width:100%; max-height:460px; object-fit:contain; border-radius:16px;
+      background:#0a001f; border:2px solid #440066;
     }
 
-    .modal-content input[type="file"]{
-      width:100%; padding:18px; background:#2a004d; border:2px dashed #ff00ff;
-      border-radius:16px; color:#fff; cursor:pointer; margin:15px 0;
-      text-align:center;
+    .delete-btn{
+      margin-top:15px; width:100%; padding:12px; border:none;
+      border-radius:10px; background:#ff0033; color:white; cursor:pointer;
     }
 
-    .modal-content select{
-      width:100%; padding:16px; margin:12px 0; background:#2a004d;
-      border:none; border-radius:12px; color:white; font-size:1.1rem;
+    .loader-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,0.94);
+      display:none; justify-content:center; align-items:center;
+      flex-direction:column; z-index:99999;
     }
+    .loader{
+      width:80px; height:80px; border:7px solid #333;
+      border-top:7px solid #00ffff; border-radius:50%; animation:spin 1s linear infinite;
+    }
+    @keyframes spin{ 100%{ transform:rotate(360deg); } }
 
-    .upload-actions{
-      margin-top:35px; display:flex; gap:15px; justify-content:center;
-    }
-
-    .upload-actions button{
-      padding:16px 40px; font-size:1.2rem; border-radius:50px;
-      transition:0.4s;
-    }
-
-    .upload-actions button:first-child{
-      background:linear-gradient(45deg, #ff00ff, #00ffff);
-      color:black; border:none; font-weight:bold;
-    }
-    .upload-actions button:first-child:hover{
-      transform:scale(1.1); box-shadow:0 0 30px #ff00ff;
-    }
+    .loader-text{ margin-top:25px; color:#00ffff; font-size:1.5rem; font-weight:bold; }
+    .progress-text{ margin-top:12px; color:#fff; font-size:1.3rem; }
   </style>
 </head>
 <body>
@@ -136,11 +117,11 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- STYLISH UPLOAD MODAL -->
+  <!-- UPLOAD MODAL -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2>UPLOAD NEW NFT</h2>
+      <h2>✦ UPLOAD NEW NFT ✦</h2>
       
       <input type="file" id="imageUpload" accept="image/*" multiple/>
       
@@ -154,7 +135,7 @@
         <option value="legendary">Legendary</option>
       </select>
       
-      <div class="upload-actions">
+      <div style="margin-top:30px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
       </div>
@@ -172,12 +153,11 @@
   <!-- LOADER -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Uploading...</div>
+    <div class="loader-text" id="loaderText">Uploading NFTs...</div>
     <div class="progress-text" id="progressText">0/0</div>
   </div>
 
   <script>
-    // === SUPABASE CONFIG ===
     const SUPABASE_URL = "https://svlhichdvqkjqdyxposi.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM";
 
@@ -188,7 +168,6 @@
     let totemsLegendaryData = [];
     let isLoggedIn = false;
 
-    // Load NFTs, Render, Delete, etc. (same as before)
     async function loadNFTs(){
       const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
 
@@ -239,18 +218,44 @@
       });
     }
 
+    // ====================== DELETE FROM BOTH DB + STORAGE ======================
     async function deleteNFT(id){
-      if(!confirm("Delete this NFT?")) return;
-      await supabaseClient.from("nfts_data").delete().eq("id", id);
-      await loadNFTs();
+      if(!confirm("Delete this NFT permanently from everywhere?")) return;
+
+      try {
+        // Pehle database se image URL le lo
+        const { data: nft } = await supabaseClient
+          .from("nfts_data")
+          .select("img")
+          .eq("id", id)
+          .single();
+
+        if(nft && nft.img){
+          // Storage se delete
+          const imagePath = nft.img.split("/nfts/")[1];
+          if(imagePath){
+            await supabaseClient.storage.from("nfts").remove([imagePath]);
+          }
+        }
+
+        // Database se delete
+        await supabaseClient.from("nfts_data").delete().eq("id", id);
+
+        alert("NFT Deleted Successfully");
+        await loadNFTs();
+      } catch(err){
+        console.error(err);
+        alert("Delete Failed");
+      }
     }
 
+    // ====================== UPLOAD WITH PROGRESS ======================
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select at least one image");
+      if(files.length === 0) return alert("Please select images");
 
       document.getElementById("loader").style.display = "flex";
-      document.getElementById("loaderText").innerText = "Uploading NFTs...";
+      document.getElementById("loaderText").innerText = "Uploading...";
       document.getElementById("progressText").innerText = `0/${files.length}`;
 
       const section = document.getElementById("nftSection").value;
@@ -277,7 +282,9 @@
 
           uploadedCount++;
           document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
-        } catch(err){ console.log(err); }
+        } catch(err){
+          console.log(err);
+        }
       }
 
       document.getElementById("loaderText").innerText = "✅ Upload Complete!";
@@ -288,14 +295,14 @@
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         closeUploadModal();
-      }, 2200);
+      }, 1800);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
     }
 
-    // Login & Other Listeners (same as previous)
+    // Login, Navigation, etc. (same)
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -315,9 +322,7 @@
       } else alert("Wrong Secret Word");
     });
 
-    document.getElementById("uploadBtn").addEventListener("click", () => {
-      document.getElementById("uploadModal").style.display = "flex";
-    });
+    document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
 
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
@@ -331,7 +336,7 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation (same)
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
