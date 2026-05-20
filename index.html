@@ -10,8 +10,8 @@
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
     body{ 
-      background: #000000;   /* New Warm Dark Background */
-      color: #000000; 
+      background: #000000; 
+      color: #ffffff; 
       font-family:Arial,sans-serif; 
       overflow-x:hidden; 
     }
@@ -36,13 +36,13 @@
       top:20px; 
       right:20px; 
       display:flex; 
-      gap:10px; 
+      gap:12px; 
       flex-wrap: wrap;
       justify-content: flex-end;
     }
 
     button{
-      padding:12px 24px; 
+      padding:12px 26px; 
       background:transparent; 
       border:2px solid; 
       border-radius:50px; 
@@ -51,36 +51,37 @@
       transition:0.3s;
     }
     button:hover{ 
-      color:black; 
       transform:scale(1.05); 
+      filter: brightness(1.15);
     }
 
-    /* === Different Button Colors === */
+    /* No solid fill on click/hover - only border glow & scale */
     #loginBtn { 
       border-color: #ffd700; 
       color: #ffd700; 
     }
-    #loginBtn:hover { background: #ffd700; }
+    #loginBtn:hover { border-color: #ffea80; box-shadow: 0 0 15px #ffd700; }
 
     #uploadBtn { 
       border-color: #ffaa00; 
       color: #ffaa00; 
     }
-    #uploadBtn:hover { background: #ffaa00; }
+    #uploadBtn:hover { border-color: #ffc266; box-shadow: 0 0 15px #ffaa00; }
 
     #deleteModeBtn { 
       border-color: #ff6600; 
       color: #ff6600; 
     }
-    #deleteModeBtn:hover { background: #ff6600; }
+    #deleteModeBtn:hover { border-color: #ff8833; box-shadow: 0 0 15px #ff6600; }
 
     .nav-btn { 
       border-color: #ffbb33; 
       color: #ffbb33; 
     }
     .nav-btn.active, .nav-btn:hover { 
-      background: #ffbb33; 
-      color: black; 
+      border-color: #ffdd77; 
+      color: #ffdd77; 
+      box-shadow: 0 0 12px #ffbb33;
     }
 
     #bestBtn { 
@@ -88,8 +89,9 @@
       color: #ffcc00; 
     }
     #bestBtn.active, #bestBtn:hover { 
-      background: #ffcc00; 
-      color: black; 
+      border-color: #ffe066; 
+      color: #ffe066; 
+      box-shadow: 0 0 12px #ffcc00;
     }
 
     #legendaryBtn { 
@@ -97,35 +99,9 @@
       color: #ff8800; 
     }
     #legendaryBtn.active, #legendaryBtn:hover { 
-      background: #ff8800; 
-      color: black; 
-    }
-
-    /* Modal Buttons */
-    .modal button {
-      margin: 8px;
-      padding: 12px 28px;
-    }
-
-    .modal button:first-of-type {
-      border-color: #ffaa00;
-      color: #ffaa00;
-    }
-    .modal button:last-of-type {
-      border-color: #ff7744;
-      color: #ff7744;
-    }
-
-    /* Bulk Delete */
-    #bulkDeleteBar button:first-of-type {
-      background: #ff3300;
-      color: white;
-      border: none;
-    }
-
-    .delete-mode-btn{
-      background:#C0C0C0 !important;
-      color:silver !important;
+      border-color: #ffaa33; 
+      color: #ffaa33; 
+      box-shadow: 0 0 12px #ff8800;
     }
 
     .nav{ 
@@ -133,7 +109,7 @@
       justify-content:center; 
       gap:20px; 
       padding:20px; 
-      background:#1f0c00; 
+      background:#0a0a0a; 
       flex-wrap:wrap; 
     }
 
@@ -160,13 +136,13 @@
       padding:8px; 
       display:grid; 
       grid-template-columns:repeat(3,1fr); 
-      gap:8px;
+      gap:10px;
     }
     .nft-card{
-      background:#2a1600; 
+      background:#111111; 
       border-radius:12px; 
       overflow:hidden; 
-      border:1px solid #664400;
+      border:1px solid #444;
       position:relative;
     }
     .nft-card img{
@@ -203,7 +179,7 @@
       display:none; 
       position:fixed; 
       inset:0; 
-      background:rgba(0,0,0,0.95);
+      background:rgba(0,0,0,0.97);
       z-index:1000; 
       justify-content:center; 
       align-items:center; 
@@ -211,12 +187,13 @@
     }
 
     .modal-content{
-      background:#1f0c00; 
+      background:#0f0f0f; 
       width:100%; 
       max-width:680px; 
-      padding:12px; 
+      padding:20px; 
       position:relative;
       border-radius:18px;
+      border: 1px solid #333;
     }
 
     .close{
@@ -238,13 +215,13 @@
       max-height:78vh; 
       object-fit:contain; 
       border-radius:12px;
-      background:#110500;
+      background:#000000;
     }
 
     .bulk-delete-bar {
       position: sticky;
       top: 0;
-      background: #1f0c00;
+      background: #0a0a0a;
       padding: 12px 20px;
       text-align: center;
       border-bottom: 2px solid #ff6600;
@@ -255,7 +232,7 @@
     .loader-overlay{
       position:fixed; 
       inset:0; 
-      background:rgba(0,0,0,0.94);
+      background:rgba(0,0,0,0.95);
       display:none; 
       justify-content:center; 
       align-items:center;
