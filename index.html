@@ -18,7 +18,7 @@
 
     header{ 
       text-align:center; 
-      padding:60px 20px 20px; 
+      padding:80px 20px 30px; /* Title ko thoda niche kiya */
       position:relative; 
     }
     
@@ -29,7 +29,6 @@
       letter-spacing:8px; 
       font-family: 'Georgia', serif;
       text-transform: uppercase;
-      margin-bottom:15px;
     }
 
     .header-buttons{ 
@@ -82,12 +81,19 @@
 
     .legendary-banner{
       max-width:900px; 
-      margin:30px auto; 
+      margin:25px auto 35px; 
       text-align:center;
       font-size:1.6rem; 
       font-weight:bold; 
       color:#ffaa00;
-      padding:10px 0;
+    }
+
+    /* Count Style */
+    .section-count {
+      font-size: 1.1rem;
+      color: #ffcc66;
+      margin-top: 8px;
+      font-weight: normal;
     }
 
     .gallery{
@@ -112,7 +118,6 @@
       cursor:pointer;
     }
 
-    /* Checkbox for delete mode */
     .select-checkbox {
       position: absolute;
       top: 12px;
@@ -135,6 +140,7 @@
       .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } 
     }
 
+    /* Tight Preview Modal */
     .modal{
       display:none; 
       position:fixed; 
@@ -143,25 +149,28 @@
       z-index:1000; 
       justify-content:center; 
       align-items:center; 
-      padding:20px;
+      padding:15px;
     }
 
     .modal-content{
-      background:#1a0033; 
+      background:#0f0022; 
       width:100%; 
-      max-width:620px; 
-      border-radius:28px;
-      padding:30px; 
+      max-width:680px; 
+      padding:12px; 
       position:relative;
+      border-radius:18px;
+      border: none;
+      box-shadow: none;
     }
 
     .close{
       position:absolute; 
-      top:15px; 
-      right:25px; 
-      font-size:42px;
+      top:8px; 
+      right:18px; 
+      font-size:38px;
       cursor:pointer; 
       color:#ffaa00;
+      z-index: 11;
     }
     .close:hover{ 
       color:#ffcc66; 
@@ -170,10 +179,11 @@
 
     .modal-content img{
       width:100%; 
-      max-height:520px; 
+      max-height:78vh; 
       object-fit:contain; 
-      border-radius:16px;
+      border-radius:12px;
       background:#0a001f;
+      display: block;
     }
 
     .bulk-delete-bar {
@@ -226,7 +236,6 @@
     </div>
   </header>
 
-  <!-- Bulk Delete Bar -->
   <div class="bulk-delete-bar" id="bulkDeleteBar">
     <span id="selectedCount" style="margin-right:20px; font-weight:bold;">0 Selected</span>
     <button onclick="deleteSelectedNFTs()" style="background:#ff0033; color:white; border:none;">DELETE SELECTED</button>
@@ -234,7 +243,7 @@
   </div>
 
   <nav class="nav">
-    <button class="nav-btn active" id="relicsBtn">RELICS</button>
+    <button class="nav-btn active" id="relicsBtn">RELICS <span id="relicsCount" class="section-count">(0)</span></button>
     <button class="nav-btn" id="totemsBtn">TOTEMS</button>
   </nav>
 
@@ -244,9 +253,9 @@
   </section>
 
   <section id="totems-section" class="section">
-    <div style="text-align:center;padding:20px;">
-      <button class="nav-btn active" id="bestBtn">BEST</button>
-      <button class="nav-btn" id="legendaryBtn">LEGENDARY</button>
+    <div style="text-align:center;padding:20px; display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
+      <button class="nav-btn active" id="bestBtn">BEST <span id="bestCount" class="section-count">(0)</span></button>
+      <button class="nav-btn" id="legendaryBtn">LEGENDARY <span id="legendaryCount" class="section-count">(0)</span></button>
     </div>
     <div class="gallery" id="totems-gallery"></div>
   </section>
@@ -319,7 +328,14 @@
         }
       });
 
+      updateCounts();
       renderAllGalleries();
+    }
+
+    function updateCounts(){
+      document.getElementById("relicsCount").innerText = `(${relicsData.length})`;
+      document.getElementById("bestCount").innerText = `(${totemsBestData.length})`;
+      document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
     }
 
     function renderAllGalleries(){
@@ -360,15 +376,8 @@
     }
 
     function toggleSelection(id, isChecked){
-      if(isChecked){
-        selectedNFTs.add(id);
-      } else {
-        selectedNFTs.delete(id);
-      }
-      updateSelectedCount();
-    }
-
-    function updateSelectedCount(){
+      if(isChecked) selectedNFTs.add(id);
+      else selectedNFTs.delete(id);
       document.getElementById("selectedCount").innerText = `${selectedNFTs.size} Selected`;
     }
 
@@ -381,21 +390,13 @@
 
       for(let id of selectedNFTs){
         try {
-          const { data: nft } = await supabaseClient
-            .from("nfts_data")
-            .select("img")
-            .eq("id", id)
-            .single();
-
+          const { data: nft } = await supabaseClient.from("nfts_data").select("img").eq("id", id).single();
           if(nft && nft.img){
             const imagePath = nft.img.split("/nfts/")[1];
             if(imagePath) await supabaseClient.storage.from("nfts").remove([imagePath]);
           }
-
           await supabaseClient.from("nfts_data").delete().eq("id", id);
-        } catch(err){
-          console.error("Error deleting NFT:", id);
-        }
+        } catch(err){ console.error(err); }
       }
 
       selectedNFTs.clear();
@@ -449,10 +450,7 @@
     });
 
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
-    document.getElementById("deleteModeBtn").addEventListener("click", () => {
-      if(deleteMode) exitDeleteMode();
-      else enterDeleteMode();
-    });
+    document.getElementById("deleteModeBtn").addEventListener("click", () => deleteMode ? exitDeleteMode() : enterDeleteMode());
 
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
@@ -466,12 +464,13 @@
       if(e.target.id === "uploadModal") document.getElementById("uploadModal").style.display = "none";
     };
 
-    // Navigation (same as before)
+    // Navigation
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
       document.getElementById("relicsBtn").classList.add("active");
       document.getElementById("totemsBtn").classList.remove("active");
+      renderGallery("relics-gallery", relicsData);
     });
 
     document.getElementById("totemsBtn").addEventListener("click", () => {
@@ -479,6 +478,7 @@
       document.getElementById("relics-section").classList.remove("active");
       document.getElementById("totemsBtn").classList.add("active");
       document.getElementById("relicsBtn").classList.remove("active");
+      renderGallery("totems-gallery", totemsBestData);
     });
 
     document.getElementById("bestBtn").addEventListener("click", () => {
