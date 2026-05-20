@@ -18,7 +18,7 @@
 
     header{ 
       text-align:center; 
-      padding:80px 20px 30px; /* Title ko thoda niche kiya */
+      padding:80px 20px 30px; 
       position:relative; 
     }
     
@@ -44,22 +44,76 @@
     button{
       padding:12px 24px; 
       background:transparent; 
-      border:2px solid #ff8800;
-      color:#ffaa00; 
+      border:2px solid; 
       border-radius:50px; 
       cursor:pointer; 
       font-weight:bold; 
       transition:0.3s;
     }
     button:hover{ 
-      background:#ff8800; 
       color:black; 
       transform:scale(1.05); 
     }
 
-    .🗑️{
-      background:#ff8800 !important;
-      color:black !important;
+    /* ===== Different Colors for Buttons ===== */
+    #loginBtn { 
+      border-color: #ffdd55; 
+      color: #ffdd55; 
+    }
+    #loginBtn:hover { background: #ffdd55; }
+
+    #uploadBtn { 
+      border-color: #ffaa00; 
+      color: #ffaa00; 
+    }
+    #uploadBtn:hover { background: #ffaa00; }
+
+    #deleteModeBtn { 
+      border-color: #ff5500; 
+      color: #ff5500; 
+      font-size: 1.4rem;
+      padding: 10px 16px;
+    }
+    #deleteModeBtn:hover { background: #ff5500; }
+
+    .nav-btn { 
+      border-color: #ffbb33; 
+      color: #ffbb33; 
+    }
+    .nav-btn.active { 
+      background: #ffbb33; 
+      color: black; 
+    }
+
+    #bestBtn { 
+      border-color: #ffcc11; 
+      color: #ffcc11; 
+    }
+    #bestBtn.active { 
+      background: #ffcc11; 
+      color: black; 
+    }
+
+    #legendaryBtn { 
+      border-color: #ff8800; 
+      color: #ff8800; 
+    }
+    #legendaryBtn.active { 
+      background: #ff8800; 
+      color: black; 
+    }
+
+    /* Modal Buttons */
+    .modal button {
+      margin: 8px 6px;
+    }
+    .modal button:first-child {
+      border-color: #ffaa00; 
+      color: #ffaa00; 
+    }
+    .modal button:last-child {
+      border-color: #ff7744; 
+      color: #ff7744; 
     }
 
     .nav{ 
@@ -69,11 +123,6 @@
       padding:20px; 
       background:#140029; 
       flex-wrap:wrap; 
-    }
-    .nav-btn.active{ 
-      background:#ff8800; 
-      border-color:#ff8800; 
-      color:black; 
     }
 
     .section{ display:none; }
@@ -88,12 +137,10 @@
       color:#ffaa00;
     }
 
-    /* Count Style */
     .section-count {
-      font-size: 1.1rem;
-      color: #ffcc66;
-      margin-top: 8px;
-      font-weight: normal;
+      font-size: 1.05rem;
+      color: #ffdd88;
+      margin-left: 6px;
     }
 
     .gallery{
@@ -140,7 +187,6 @@
       .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } 
     }
 
-    /* Tight Preview Modal */
     .modal{
       display:none; 
       position:fixed; 
@@ -159,8 +205,6 @@
       padding:12px; 
       position:relative;
       border-radius:18px;
-      border: none;
-      box-shadow: none;
     }
 
     .close{
@@ -172,19 +216,6 @@
       color:#ffaa00;
       z-index: 11;
     }
-    .close:hover{ 
-      color:#ffcc66; 
-      transform:rotate(90deg); 
-    }
-
-    .modal-content img{
-      width:100%; 
-      max-height:78vh; 
-      object-fit:contain; 
-      border-radius:12px;
-      background:#0a001f;
-      display: block;
-    }
 
     .bulk-delete-bar {
       position: sticky;
@@ -192,7 +223,7 @@
       background: #1a0033;
       padding: 12px 20px;
       text-align: center;
-      border-bottom: 2px solid #ff8800;
+      border-bottom: 2px solid #ff5500;
       display: none;
       z-index: 100;
     }
@@ -232,14 +263,14 @@
     <div class="header-buttons">
       <button id="loginBtn">LOGIN</button>
       <button id="uploadBtn" style="display:none;">UPLOAD NFT</button>
-      <button id="deleteModeBtn" style="display:none;">ENTER DELETE MODE</button>
+      <button id="deleteModeBtn" style="display:none;">🗑️</button>
     </div>
   </header>
 
   <div class="bulk-delete-bar" id="bulkDeleteBar">
     <span id="selectedCount" style="margin-right:20px; font-weight:bold;">0 Selected</span>
-    <button onclick="deleteSelectedNFTs()" style="background:#ff0033; color:white; border:none;">DELETE SELECTED</button>
-    <button onclick="exitDeleteMode()" style="margin-left:12px;">CANCEL</button>
+    <button onclick="deleteSelectedNFTs()">DELETE SELECTED</button>
+    <button onclick="exitDeleteMode()">CANCEL</button>
   </div>
 
   <nav class="nav">
@@ -355,7 +386,6 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.className = "nft-card";
-        
         card.innerHTML = `
           <input type="checkbox" class="select-checkbox" data-id="${item.id}">
           <img src="${item.img}" alt="NFT">
@@ -370,7 +400,6 @@
             document.getElementById("previewModal").style.display = "flex";
           }
         };
-
         container.appendChild(card);
       });
     }
@@ -412,7 +441,6 @@
     function enterDeleteMode(){
       deleteMode = true;
       document.body.classList.add("delete-mode");
-      document.getElementById("deleteModeBtn").innerText = "EXIT DELETE MODE";
       document.getElementById("deleteModeBtn").classList.add("delete-mode-btn");
       document.getElementById("bulkDeleteBar").style.display = "block";
       renderAllGalleries();
@@ -422,13 +450,12 @@
       deleteMode = false;
       selectedNFTs.clear();
       document.body.classList.remove("delete-mode");
-      document.getElementById("deleteModeBtn").innerText = "ENTER DELETE MODE";
       document.getElementById("deleteModeBtn").classList.remove("delete-mode-btn");
       document.getElementById("bulkDeleteBar").style.display = "none";
       renderAllGalleries();
     }
 
-    // Login
+    // Event Listeners
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
