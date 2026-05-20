@@ -10,8 +10,8 @@
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
     body{ 
-      background:#0a001f; 
-      color:white; 
+      background: #110500;   /* New Warm Dark Background */
+      color: #ffffff; 
       font-family:Arial,sans-serif; 
       overflow-x:hidden; 
     }
@@ -55,12 +55,12 @@
       transform:scale(1.05); 
     }
 
-    /* ===== Different Colors for Buttons ===== */
+    /* === Different Button Colors === */
     #loginBtn { 
-      border-color: #ffdd55; 
-      color: #ffdd55; 
+      border-color: #ffd700; 
+      color: #ffd700; 
     }
-    #loginBtn:hover { background: #ffdd55; }
+    #loginBtn:hover { background: #ffd700; }
 
     #uploadBtn { 
       border-color: #ffaa00; 
@@ -69,28 +69,26 @@
     #uploadBtn:hover { background: #ffaa00; }
 
     #deleteModeBtn { 
-      border-color: #ff5500; 
-      color: #ff5500; 
-      font-size: 1.4rem;
-      padding: 10px 16px;
+      border-color: #ff6600; 
+      color: #ff6600; 
     }
-    #deleteModeBtn:hover { background: #ff5500; }
+    #deleteModeBtn:hover { background: #ff6600; }
 
     .nav-btn { 
       border-color: #ffbb33; 
       color: #ffbb33; 
     }
-    .nav-btn.active { 
+    .nav-btn.active, .nav-btn:hover { 
       background: #ffbb33; 
       color: black; 
     }
 
     #bestBtn { 
-      border-color: #ffcc11; 
-      color: #ffcc11; 
+      border-color: #ffcc00; 
+      color: #ffcc00; 
     }
-    #bestBtn.active { 
-      background: #ffcc11; 
+    #bestBtn.active, #bestBtn:hover { 
+      background: #ffcc00; 
       color: black; 
     }
 
@@ -98,22 +96,36 @@
       border-color: #ff8800; 
       color: #ff8800; 
     }
-    #legendaryBtn.active { 
+    #legendaryBtn.active, #legendaryBtn:hover { 
       background: #ff8800; 
       color: black; 
     }
 
     /* Modal Buttons */
     .modal button {
-      margin: 8px 6px;
+      margin: 8px;
+      padding: 12px 28px;
     }
-    .modal button:first-child {
-      border-color: #ffaa00; 
-      color: #ffaa00; 
+
+    .modal button:first-of-type {
+      border-color: #ffaa00;
+      color: #ffaa00;
     }
-    .modal button:last-child {
-      border-color: #ff7744; 
-      color: #ff7744; 
+    .modal button:last-of-type {
+      border-color: #ff7744;
+      color: #ff7744;
+    }
+
+    /* Bulk Delete */
+    #bulkDeleteBar button:first-of-type {
+      background: #ff3300;
+      color: white;
+      border: none;
+    }
+
+    .delete-mode-btn{
+      background:#ff6600 !important;
+      color:black !important;
     }
 
     .nav{ 
@@ -121,7 +133,7 @@
       justify-content:center; 
       gap:20px; 
       padding:20px; 
-      background:#140029; 
+      background:#1f0c00; 
       flex-wrap:wrap; 
     }
 
@@ -134,7 +146,7 @@
       text-align:center;
       font-size:1.6rem; 
       font-weight:bold; 
-      color:#ffaa00;
+      color:#ffcc66;
     }
 
     .section-count {
@@ -151,10 +163,10 @@
       gap:8px;
     }
     .nft-card{
-      background:#1d0037; 
+      background:#2a1600; 
       border-radius:12px; 
       overflow:hidden; 
-      border:1px solid #442200;
+      border:1px solid #664400;
       position:relative;
     }
     .nft-card img{
@@ -199,7 +211,7 @@
     }
 
     .modal-content{
-      background:#0f0022; 
+      background:#1f0c00; 
       width:100%; 
       max-width:680px; 
       padding:12px; 
@@ -216,14 +228,26 @@
       color:#ffaa00;
       z-index: 11;
     }
+    .close:hover{ 
+      color:#ffcc66; 
+      transform:rotate(90deg); 
+    }
+
+    .modal-content img{
+      width:100%; 
+      max-height:78vh; 
+      object-fit:contain; 
+      border-radius:12px;
+      background:#110500;
+    }
 
     .bulk-delete-bar {
       position: sticky;
       top: 0;
-      background: #1a0033;
+      background: #1f0c00;
       padding: 12px 20px;
       text-align: center;
-      border-bottom: 2px solid #ff5500;
+      border-bottom: 2px solid #ff6600;
       display: none;
       z-index: 100;
     }
@@ -386,6 +410,7 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.className = "nft-card";
+        
         card.innerHTML = `
           <input type="checkbox" class="select-checkbox" data-id="${item.id}">
           <img src="${item.img}" alt="NFT">
@@ -400,6 +425,7 @@
             document.getElementById("previewModal").style.display = "flex";
           }
         };
+
         container.appendChild(card);
       });
     }
@@ -455,7 +481,7 @@
       renderAllGalleries();
     }
 
-    // Event Listeners
+    // Login
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
