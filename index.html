@@ -38,7 +38,6 @@
       display:flex; 
       gap:12px; 
       flex-wrap: wrap;
-      justify-content: flex-end;
     }
 
     button{
@@ -55,53 +54,77 @@
       filter: brightness(1.15);
     }
 
-    /* No solid fill on click/hover - only border glow & scale */
-    #loginBtn { 
-      border-color: #ffd700; 
-      color: #ffd700; 
-    }
+    /* Header Buttons */
+    #loginBtn { border-color: #ffd700; color: #ffd700; }
     #loginBtn:hover { border-color: #ffea80; box-shadow: 0 0 15px #ffd700; }
 
-    #uploadBtn { 
-      border-color: #ffaa00; 
-      color: #ffaa00; 
-    }
+    #uploadBtn { border-color: #ffaa00; color: #ffaa00; }
     #uploadBtn:hover { border-color: #ffc266; box-shadow: 0 0 15px #ffaa00; }
 
-    #deleteModeBtn { 
-      border-color: #ff6600; 
-      color: #ff6600; 
-    }
+    #deleteModeBtn { border-color: #ff6600; color: #ff6600; }
     #deleteModeBtn:hover { border-color: #ff8833; box-shadow: 0 0 15px #ff6600; }
 
-    .nav-btn { 
-      border-color: #ffbb33; 
-      color: #ffbb33; 
-    }
+    /* Nav Buttons */
+    .nav-btn { border-color: #ffbb33; color: #ffbb33; }
     .nav-btn.active, .nav-btn:hover { 
       border-color: #ffdd77; 
       color: #ffdd77; 
       box-shadow: 0 0 12px #ffbb33;
     }
 
-    #bestBtn { 
-      border-color: #ffcc00; 
-      color: #ffcc00; 
-    }
-    #bestBtn.active, #bestBtn:hover { 
-      border-color: #ffe066; 
-      color: #ffe066; 
-      box-shadow: 0 0 12px #ffcc00;
+    /* Bulk Delete Bar */
+    .bulk-delete-bar {
+      position: sticky;
+      top: 0;
+      background: #0a0a0a;
+      padding: 15px 20px;
+      text-align: center;
+      border-bottom: 2px solid #ff6600;
+      display: none;
+      z-index: 100;
     }
 
-    #legendaryBtn { 
-      border-color: #ff8800; 
-      color: #ff8800; 
+    #selectedCount {
+      color: #ffdd88;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-right: 20px;
     }
-    #legendaryBtn.active, #legendaryBtn:hover { 
-      border-color: #ffaa33; 
-      color: #ffaa33; 
-      box-shadow: 0 0 12px #ff8800;
+
+    .bulk-delete-bar button {
+      padding: 12px 24px;
+      margin: 0 8px;
+      border-radius: 50px;
+      font-weight: bold;
+    }
+
+    .bulk-delete-bar button:first-of-type {  /* DELETE SELECTED */
+      background: #ff4400;
+      color: white;
+      border: none;
+    }
+    .bulk-delete-bar button:last-of-type {   /* CANCEL */
+      border: 2px solid #ffaa00;
+      color: #ffaa00;
+      background: transparent;
+    }
+
+    /* Upload Modal Buttons - Strong & Visible */
+    .modal button {
+      padding: 14px 32px;
+      margin: 8px;
+      font-size: 1.05rem;
+    }
+
+    .modal button:first-of-type {   /* UPLOAD NOW */
+      background: #ff8800;
+      color: white;
+      border: none;
+    }
+    .modal button:last-of-type {    /* CANCEL */
+      border: 2px solid #ffcc66;
+      color: #ffcc66;
+      background: transparent;
     }
 
     .nav{ 
@@ -128,7 +151,6 @@
     .section-count {
       font-size: 1.05rem;
       color: #ffdd88;
-      margin-left: 6px;
     }
 
     .gallery{
@@ -190,7 +212,7 @@
       background:#0f0f0f; 
       width:100%; 
       max-width:680px; 
-      padding:20px; 
+      padding:25px; 
       position:relative;
       border-radius:18px;
       border: 1px solid #333;
@@ -198,17 +220,13 @@
 
     .close{
       position:absolute; 
-      top:8px; 
-      right:18px; 
+      top:10px; 
+      right:20px; 
       font-size:38px;
       cursor:pointer; 
       color:#ffaa00;
-      z-index: 11;
     }
-    .close:hover{ 
-      color:#ffcc66; 
-      transform:rotate(90deg); 
-    }
+    .close:hover{ color:#ffcc66; transform:rotate(90deg); }
 
     .modal-content img{
       width:100%; 
@@ -216,17 +234,6 @@
       object-fit:contain; 
       border-radius:12px;
       background:#000000;
-    }
-
-    .bulk-delete-bar {
-      position: sticky;
-      top: 0;
-      background: #0a0a0a;
-      padding: 12px 20px;
-      text-align: center;
-      border-bottom: 2px solid #ff6600;
-      display: none;
-      z-index: 100;
     }
 
     .loader-overlay{
@@ -269,7 +276,7 @@
   </header>
 
   <div class="bulk-delete-bar" id="bulkDeleteBar">
-    <span id="selectedCount" style="margin-right:20px; font-weight:bold;">0 Selected</span>
+    <span id="selectedCount">0 Selected</span>
     <button onclick="deleteSelectedNFTs()">DELETE SELECTED</button>
     <button onclick="exitDeleteMode()">CANCEL</button>
   </div>
@@ -296,16 +303,16 @@
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2 style="color:#ffaa00; text-align:center; margin-bottom:25px;">✦ UPLOAD NEW NFT ✦</h2>
+      <h2 style="color:#ffaa00; text-align:center; margin-bottom:30px;">✦ UPLOAD NEW NFT ✦</h2>
       
-      <input type="file" id="imageUpload" accept="image/*" multiple/>
+      <input type="file" id="imageUpload" accept="image/*" multiple style="margin-bottom:20px; width:100%;"/>
       
-      <select id="nftSection" style="margin:15px 0; padding:10px; width:100%;">
+      <select id="nftSection" style="margin:15px 0; padding:12px; width:100%;">
         <option value="relics">Relics</option>
         <option value="totems">Totems</option>
       </select>
       
-      <select id="totemType" style="display:none; margin-bottom:15px; padding:10px; width:100%;">
+      <select id="totemType" style="display:none; margin-bottom:15px; padding:12px; width:100%;">
         <option value="best">Best</option>
         <option value="legendary">Legendary</option>
       </select>
@@ -332,6 +339,7 @@
   </div>
 
   <script>
+    // (Script same rakha hai, sirf chhoti improvement)
     const SUPABASE_URL = "https://svlhichdvqkjqdyxposi.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM";
 
@@ -387,7 +395,6 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.className = "nft-card";
-        
         card.innerHTML = `
           <input type="checkbox" class="select-checkbox" data-id="${item.id}">
           <img src="${item.img}" alt="NFT">
@@ -458,7 +465,7 @@
       renderAllGalleries();
     }
 
-    // Login
+    // Login, Navigation etc. same
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -494,7 +501,7 @@
       if(e.target.id === "uploadModal") document.getElementById("uploadModal").style.display = "none";
     };
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
