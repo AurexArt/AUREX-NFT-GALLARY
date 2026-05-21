@@ -136,21 +136,25 @@
     }
 
     /* Bulk Delete Bar */
-    .bulk-delete-bar {
-      position: sticky;
-      top: 0;
-      background: #0a0a0a;
-      padding: 15px 20px;
-      text-align: center;
-      border-bottom: 2px solid #ff6600;
-      display: none;
-      z-index: 100;
+    // ====================== BULK DELETE FUNCTION ======================
+async function deleteSelectedNFTs() {
+    if (selectedNFTs.size === 0) return;
+    
+    if (!confirm(`Delete ${selectedNFTs.size} selected NFTs permanently?`)) return;
+
+    let success = 0;
+    for (let id of selectedNFTs) {
+        try {
+            await deleteNFT(id);   // upar wale function ko call karega
+            success++;
+        } catch (e) {
+            console.error("Failed to delete ID:", id);
+        }
     }
 
-    #selectedCount { color: #ffdd88; font-size: 1.15rem; font-weight: bold; }
-
-    .bulk-delete-bar button:first-of-type { background: #ff4400; color: white; border: none; }
-    .bulk-delete-bar button:last-of-type { border: 2px solid #ffaa00; color: #ffaa00; }
+    exitDeleteMode();
+    alert(`${success} NFT(s) Deleted Successfully`);
+}
 
     .section{ display:none; }
     .section.active{ display:block; }
