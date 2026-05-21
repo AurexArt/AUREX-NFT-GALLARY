@@ -115,7 +115,23 @@
       font-size:1.5rem;
       font-weight:bold;
     }
+    #uploadNowBtn{
+  color:#ffaa00;
+  border-color:#ffaa00;
+}
 
+#uploadNowBtn:hover{
+  box-shadow:0 0 12px #ffaa00;
+}
+
+#cancelBtn{
+  color:#ff3300;
+  border-color:#ff3300;
+}
+
+#cancelBtn:hover{
+  box-shadow:0 0 12px #ff3300;
+}
     .gallery{
       width:100%;
       padding:15px;
@@ -296,9 +312,9 @@
       LOGIN
     </button>
 
-    <button id="uploadBtn" style="display:none;">
-      UPLOAD NFT
-    </button>
+    <button onclick="uploadNFTs()" id="uploadNowBtn">
+  UPLOAD NOW
+</button>
 
     <button id="deleteModeBtn" style="display:none;">
       🗑️
@@ -374,12 +390,12 @@
     <div class="modal-buttons">
 
       <button onclick="uploadNFTs()">
-        UPLOAD NOW
-      </button>
+  UPLOAD NOW
+</button>
 
-      <button onclick="closeUploadModal()">
-        CANCEL
-      </button>
+      <button onclick="closeUploadModal()" id="cancelBtn">
+  CANCEL
+</button>
 
     </div>
 
