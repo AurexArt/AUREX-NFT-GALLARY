@@ -8,7 +8,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    *{ margin:0; padding:0; box-sizing:border-box; }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
 
     body{
       background:#000;
@@ -24,9 +29,8 @@
     }
 
     h1{
-      font-size:5.2rem;
+      font-size:5rem;
       color:#ffaa00;
-      font-weight:400;
       letter-spacing:8px;
       font-family:Georgia,serif;
     }
@@ -40,10 +44,10 @@
     }
 
     button{
-      padding:12px 26px;
-      background:transparent;
-      border:2px solid;
+      padding:12px 24px;
       border-radius:50px;
+      border:2px solid;
+      background:transparent;
       cursor:pointer;
       font-weight:bold;
       transition:.3s;
@@ -63,6 +67,27 @@
       color:#ffaa00;
     }
 
+    #deleteModeBtn{
+      border-color:#ff3300;
+      color:#ff3300;
+      font-size:18px;
+      padding:10px 18px;
+    }
+
+    #deleteModeBtn:hover{
+      background:#ff3300;
+      color:white;
+    }
+
+    .nav{
+      display:flex;
+      justify-content:center;
+      gap:20px;
+      padding:20px;
+      background:#0a0a0a;
+      flex-wrap:wrap;
+    }
+
     .nav-btn{
       border-color:#ffbb33;
       color:#ffbb33;
@@ -75,13 +100,76 @@
       box-shadow:0 0 12px #ffbb33;
     }
 
-    .nav{
-      display:flex;
-      justify-content:center;
-      gap:20px;
-      padding:20px;
-      background:#0a0a0a;
-      flex-wrap:wrap;
+    .section{
+      display:none;
+    }
+
+    .section.active{
+      display:block;
+    }
+
+    .legendary-banner{
+      text-align:center;
+      margin:25px 0;
+      color:#ffcc66;
+      font-size:1.5rem;
+      font-weight:bold;
+    }
+
+    .gallery{
+      width:100%;
+      padding:15px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    @media(min-width:768px){
+      .gallery{
+        grid-template-columns:repeat(5,1fr);
+      }
+    }
+
+    @media(min-width:1024px){
+      .gallery{
+        grid-template-columns:repeat(6,1fr);
+      }
+    }
+
+    .nft-card{
+      background:#111;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid #444;
+      position:relative;
+    }
+
+    .nft-card img{
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      display:block;
+      cursor:pointer;
+    }
+
+    .delete-btn{
+      position:absolute;
+      top:10px;
+      right:10px;
+      background:#ff3300;
+      color:white;
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:12px;
+      font-weight:bold;
+      cursor:pointer;
+      z-index:50;
+      display:none;
+    }
+
+    .delete-mode .delete-btn{
+      display:block;
     }
 
     .modal{
@@ -137,82 +225,6 @@
       justify-content:center;
       gap:15px;
       flex-wrap:wrap;
-    }
-
-    .section{
-      display:none;
-    }
-
-    .section.active{
-      display:block;
-    }
-
-    .legendary-banner{
-      max-width:900px;
-      margin:25px auto 35px;
-      text-align:center;
-      font-size:1.6rem;
-      font-weight:bold;
-      color:#ffcc66;
-    }
-
-    .gallery{
-      width:100%;
-      padding:8px;
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-    }
-
-    .nft-card{
-      background:#111;
-      border-radius:12px;
-      overflow:hidden;
-      border:1px solid #444;
-      position:relative;
-    }
-
-    .nft-card img{
-      width:100%;
-      aspect-ratio:1/1;
-      object-fit:cover;
-      display:block;
-      cursor:pointer;
-    }
-
-    /* DELETE BUTTON */
-    .delete-btn{
-      position:absolute;
-      top:10px;
-      right:10px;
-      background:#ff3300;
-      color:#fff;
-      border:none;
-      padding:8px 12px;
-      border-radius:8px;
-      font-size:12px;
-      font-weight:bold;
-      cursor:pointer;
-      z-index:50;
-    }
-
-    .delete-btn:hover{
-      background:#ff5500;
-    }
-
-    @media(min-width:768px){
-      .gallery{
-        grid-template-columns:repeat(5,1fr);
-        gap:12px;
-      }
-    }
-
-    @media(min-width:1024px){
-      .gallery{
-        grid-template-columns:repeat(6,1fr);
-        gap:15px;
-        padding:20px;
-      }
     }
 
     .close{
@@ -275,42 +287,79 @@
 <body>
 
 <header>
+
   <h1>AUREX</h1>
 
   <div class="header-buttons">
-    <button id="loginBtn">LOGIN</button>
-    <button id="uploadBtn" style="display:none;">UPLOAD NFT</button>
+
+    <button id="loginBtn">
+      LOGIN
+    </button>
+
+    <button id="uploadBtn" style="display:none;">
+      UPLOAD NFT
+    </button>
+
+    <button id="deleteModeBtn" style="display:none;">
+      🗑️
+    </button>
+
   </div>
+
 </header>
 
 <nav class="nav">
-  <button class="nav-btn active" id="relicsBtn">RELICS</button>
-  <button class="nav-btn" id="totemsBtn">TOTEMS</button>
+
+  <button class="nav-btn active" id="relicsBtn">
+    RELICS
+  </button>
+
+  <button class="nav-btn" id="totemsBtn">
+    TOTEMS
+  </button>
+
 </nav>
 
 <section id="relics-section" class="section active">
-  <div class="legendary-banner">ALL RELICS ARE LEGENDARY</div>
+
+  <div class="legendary-banner">
+    ALL RELICS ARE LEGENDARY
+  </div>
+
   <div class="gallery" id="relics-gallery"></div>
+
 </section>
 
 <section id="totems-section" class="section">
+
   <div style="text-align:center;padding:20px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap;">
-    <button class="nav-btn active" id="bestBtn">BEST</button>
-    <button class="nav-btn" id="legendaryBtn">LEGENDARY</button>
+
+    <button class="nav-btn active" id="bestBtn">
+      BEST
+    </button>
+
+    <button class="nav-btn" id="legendaryBtn">
+      LEGENDARY
+    </button>
+
   </div>
 
   <div class="gallery" id="totems-gallery"></div>
+
 </section>
 
 <!-- UPLOAD MODAL -->
 <div class="modal" id="uploadModal">
+
   <div class="modal-content">
 
-    <span class="close" id="closeUpload">&times;</span>
+    <span class="close" id="closeUpload">
+      &times;
+    </span>
 
-    <h2>UPLOAD NEW NFT</h2>
+    <h2>UPLOAD NFT</h2>
 
-    <input type="file" id="imageUpload" accept="image/*" multiple/>
+    <input type="file" id="imageUpload" multiple accept="image/*"/>
 
     <select id="nftSection">
       <option value="relics">Relics</option>
@@ -323,29 +372,49 @@
     </select>
 
     <div class="modal-buttons">
-      <button onclick="uploadNFTs()">UPLOAD NOW</button>
-      <button onclick="closeUploadModal()">CANCEL</button>
+
+      <button onclick="uploadNFTs()">
+        UPLOAD NOW
+      </button>
+
+      <button onclick="closeUploadModal()">
+        CANCEL
+      </button>
+
     </div>
 
   </div>
+
 </div>
 
 <!-- PREVIEW MODAL -->
 <div class="modal" id="previewModal">
+
   <div class="modal-content">
 
-    <span class="close" id="closePreview">&times;</span>
+    <span class="close" id="closePreview">
+      &times;
+    </span>
 
-    <img id="modalImage" src="" alt="NFT">
+    <img id="modalImage" src="">
 
   </div>
+
 </div>
 
 <!-- LOADER -->
 <div class="loader-overlay" id="loader">
+
   <div class="loader"></div>
-  <div class="loader-text" id="loaderText">Uploading NFTs...</div>
-  <div class="progress-text" id="progressText">0/0</div>
+
+  <div class="loader-text" id="loaderText">
+    Uploading NFTs...
+  </div>
+
+  <div class="progress-text" id="progressText">
+    0/0
+  </div>
+
 </div>
 
 <script>
@@ -508,11 +577,29 @@
         isLoggedIn = true;
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
+        document.getElementById("deleteModeBtn").style.display = "block";
         loadNFTs();
         alert("Login Successful");
       } else alert("Wrong Secret Word");
     });
 
+        document.getElementById("deleteModeBtn")
+.addEventListener("click", async () => {
+
+  deleteMode = !deleteMode;
+
+  if(deleteMode){
+
+    document.body.classList.add("delete-mode");
+
+  }else{
+
+    document.body.classList.remove("delete-mode");
+  }
+
+  await loadNFTs();
+});
+  
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
 
     document.getElementById("nftSection").addEventListener("change", function(){
