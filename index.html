@@ -53,6 +53,7 @@
       filter: brightness(1.15);
     }
 
+    /* Header Buttons */
     #loginBtn { border-color: #ffd700; color: #ffd700; }
     #loginBtn:hover { border-color: #ffea80; box-shadow: 0 0 15px #ffd700; }
 
@@ -76,6 +77,7 @@
       flex-wrap:wrap; 
     }
 
+    /* Upload Modal - More Attractive */
     .modal{
       display:none; 
       position:fixed; 
@@ -147,6 +149,9 @@
 
     #selectedCount { color: #ffdd88; font-size: 1.15rem; font-weight: bold; }
 
+    .bulk-delete-bar button:first-of-type { background: #ff4400; color: white; border: none; }
+    .bulk-delete-bar button:last-of-type { border: 2px solid #ffaa00; color: #ffaa00; }
+
     .section{ display:none; }
     .section.active{ display:block; }
 
@@ -158,6 +163,8 @@
       font-weight:bold; 
       color:#ffcc66;
     }
+
+    .section-count { color: #ffdd88; }
 
     .gallery{
       width:100%; 
@@ -277,7 +284,7 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- Upload Modal -->
+  <!-- === IMPROVED UPLOAD MODAL === -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
@@ -323,15 +330,17 @@
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let relicsData = [], totemsBestData = [], totemsLegendaryData = [];
+    let relicsData = [];
+    let totemsBestData = [];
+    let totemsLegendaryData = [];
     let isLoggedIn = false;
-    let deleteMode = false;
-    let selectedNFTs = new Set();
 
     async function loadNFTs(){
       const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
 
-      relicsData = []; totemsBestData = []; totemsLegendaryData = [];
+      relicsData = [];
+      totemsBestData = [];
+      totemsLegendaryData = [];
 
       data.forEach(item => {
         const nft = { id: item.id, img: item.img, section: item.section, type: item.type };
@@ -342,17 +351,6 @@
         }
       });
 
-      updateCounts();
-      renderAllGalleries();
-    }
-
-    function updateCounts(){
-      document.getElementById("relicsCount").innerText = `(${relicsData.length})`;
-      document.getElementById("bestCount").innerText = `(${totemsBestData.length})`;
-      document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
-    }
-
-    function renderAllGalleries(){
       renderGallery("relics-gallery", relicsData);
       renderGallery("totems-gallery", totemsBestData);
     }
@@ -362,7 +360,7 @@
       container.innerHTML = "";
 
       if(data.length === 0){
-        container.innerHTML = "<h2 style='text-align:center;width:100%;padding:40px;color:#ffaa00;'>No NFTs Yet</h2>";
+        container.innerHTML = "<h2 style='text-align:center;width:100%;padding:40px;'>No NFTs Yet</h2>";
         return;
       }
 
@@ -373,7 +371,7 @@
 
         if(isLoggedIn){
           const delBtn = document.createElement("button");
-          delBtn.style.cssText = "margin-top:10px;width:100%;padding:8px;background:#ff0033;color:white;border:none;border-radius:8px;cursor:pointer;";
+          delBtn.className = "delete-btn";
           delBtn.innerText = "DELETE";
           delBtn.onclick = () => deleteNFT(item.id);
           card.appendChild(delBtn);
@@ -387,21 +385,29 @@
       });
     }
 
-    // ====================== DELETE NFT (DB + STORAGE) ======================
+    // ====================== DELETE FROM BOTH DB + STORAGE ======================
     async function deleteNFT(id){
       if(!confirm("Delete this NFT permanently from everywhere?")) return;
 
       try {
-        const { data: nft } = await supabaseClient.from("nfts_data").select("img").eq("id", id).single();
+        // Pehle database se image URL le lo
+        const { data: nft } = await supabaseClient
+          .from("nfts_data")
+          .select("img")
+          .eq("id", id)
+          .single();
 
         if(nft && nft.img){
+          // Storage se delete
           const imagePath = nft.img.split("/nfts/")[1];
           if(imagePath){
             await supabaseClient.storage.from("nfts").remove([imagePath]);
           }
         }
 
+        // Database se delete
         await supabaseClient.from("nfts_data").delete().eq("id", id);
+
         alert("NFT Deleted Successfully");
         await loadNFTs();
       } catch(err){
@@ -410,17 +416,7 @@
       }
     }
 
-    // Bulk Delete
-    async function deleteSelectedNFTs(){
-      if(selectedNFTs.size === 0) return;
-      if(!confirm(`Delete ${selectedNFTs.size} NFTs?`)) return;
-
-      for(let id of selectedNFTs){
-        await deleteNFT(id);
-      }
-      exitDeleteMode();
-    }
-
+    // ====================== UPLOAD WITH PROGRESS ======================
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
       if(files.length === 0) return alert("Please select images");
@@ -444,6 +440,8 @@
           const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
 
           await supabaseClient.from("nfts_data").insert([{
+            title: "Untitled",
+            description: "",
             img: urlData.publicUrl,
             section: section,
             type: totemType || null
@@ -452,45 +450,32 @@
           uploadedCount++;
           document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
         } catch(err){
-          console.error(err);
+          console.log(err);
         }
       }
 
       document.getElementById("loaderText").innerText = "✅ Upload Complete!";
+      document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded Successfully`;
+
+      await loadNFTs();
+
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         closeUploadModal();
-        loadNFTs();
       }, 1800);
     }
 
     function closeUploadModal(){
       document.getElementById("uploadModal").style.display = "none";
-      document.getElementById("imageUpload").value = "";
     }
 
-    function enterDeleteMode(){
-      deleteMode = true;
-      document.body.classList.add("delete-mode");
-      document.getElementById("bulkDeleteBar").style.display = "block";
-    }
-
-    function exitDeleteMode(){
-      deleteMode = false;
-      selectedNFTs.clear();
-      document.body.classList.remove("delete-mode");
-      document.getElementById("bulkDeleteBar").style.display = "none";
-      loadNFTs();
-    }
-
-    // Login
+    // Login, Navigation, etc. (same)
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
         document.getElementById("loginBtn").innerText = "LOGIN";
         document.getElementById("uploadBtn").style.display = "none";
-        document.getElementById("deleteModeBtn").style.display = "none";
-        exitDeleteMode();
+        loadNFTs();
         alert("Logged Out");
         return;
       }
@@ -499,13 +484,12 @@
         isLoggedIn = true;
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
-        document.getElementById("deleteModeBtn").style.display = "block";
+        loadNFTs();
         alert("Login Successful");
       } else alert("Wrong Secret Word");
     });
 
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
-    document.getElementById("deleteModeBtn").addEventListener("click", () => deleteMode ? exitDeleteMode() : enterDeleteMode());
 
     document.getElementById("nftSection").addEventListener("change", function(){
       document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
@@ -519,7 +503,7 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
+    // Navigation Buttons
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
