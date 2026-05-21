@@ -262,209 +262,425 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://svlhichdvqkjqdyxposi.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bGhpY2hkdnFranFkeXhwb3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwODE1NjIsImV4cCI6MjA5NDY1NzU2Mn0.zsFjmGqt4izynQ-_iMYtqxY3Q32BrYJkoGTM44K6KPM";
+const SUPABASE_URL = "https://svlhichdvqkjqdyxposi.supabase.co";
+const SUPABASE_KEY = "YOUR_SUPABASE_KEY";
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let relicsData = [], totemsBestData = [], totemsLegendaryData = [];
-    let isLoggedIn = false;
-    let deleteMode = false;
-    let selectedNFTs = new Set();
+let relicsData = [], totemsBestData = [], totemsLegendaryData = [];
+let isLoggedIn = false;
+let deleteMode = false;
+let selectedNFTs = new Set();
 
-    async function loadNFTs(){
-      const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
+async function loadNFTs(){
 
-      relicsData = []; totemsBestData = []; totemsLegendaryData = [];
+  const { data, error } = await supabaseClient
+    .from("nfts_data")
+    .select("*")
+    .order("id", { ascending:false });
 
-      data.forEach(item => {
-        const nft = { id: item.id, img: item.img, section: item.section, type: item.type };
-        if (item.section === "relics") relicsData.push(nft);
-        else if (item.section === "totems") {
-          if (item.type === "best") totemsBestData.push(nft);
-          else if (item.type === "legendary") totemsLegendaryData.push(nft);
-        }
-      });
+  if(error){
+    console.error("Load Error:", error);
+    return;
+  }
 
-      updateCounts();
-      renderCurrentGallery();
-    }
+  relicsData = [];
+  totemsBestData = [];
+  totemsLegendaryData = [];
 
-    function updateCounts(){
-      document.getElementById("relicsCount").innerText = `(${relicsData.length})`;
-      document.getElementById("bestCount").innerText = `(${totemsBestData.length})`;
-      document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
-    }
+  if(!data || data.length === 0){
+    renderAllGalleries();
+    updateCounts();
+    return;
+  }
 
-    function renderCurrentGallery(){
-      if (document.getElementById("relics-section").classList.contains("active")) {
-        renderGallery("relics-gallery", relicsData);
-      } else {
-        const isBest = document.getElementById("bestBtn").classList.contains("active");
-        renderGallery("totems-gallery", isBest ? totemsBestData : totemsLegendaryData);
-      }
-    }
+  data.forEach(item => {
 
-    function renderGallery(containerId, data){
-      const container = document.getElementById(containerId);
-      container.innerHTML = "";
-
-      if(data.length === 0){
-        container.innerHTML = `<h2 style='text-align:center;padding:60px;color:#ffaa00;'>No NFTs Yet</h2>`;
-        return;
-      }
-
-      data.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "nft-card";
-        card.innerHTML = `
-          <input type="checkbox" class="select-checkbox" data-id="${item.id}">
-          <img src="${item.img}" alt="NFT">
-        `;
-
-        card.querySelector(".select-checkbox").addEventListener("change", (e) => {
-          if(e.target.checked) selectedNFTs.add(item.id);
-          else selectedNFTs.delete(item.id);
-          document.getElementById("selectedCount").innerText = `${selectedNFTs.size} Selected`;
-        });
-
-        card.querySelector("img").onclick = () => {
-          if(!deleteMode){
-            document.getElementById("modalImage").src = item.img;
-            document.getElementById("previewModal").style.display = "flex";
-          }
-        };
-        container.appendChild(card);
-      });
-    }
-
-    async function uploadNFTs(){
-      const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select images!");
-
-      document.getElementById("loader").style.display = "flex";
-      document.getElementById("loaderText").innerText = "Uploading NFTs...";
-      document.getElementById("progressText").innerText = `0/${files.length}`;
-
-      const section = document.getElementById("nftSection").value;
-      const type = document.getElementById("totemType").value || null;
-
-      let count = 0;
-
-      for(let file of files){
-        try {
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
-          const path = `${section}/${fileName}`;
-
-          await supabaseClient.storage.from("nfts").upload(path, file, { upsert: true });
-          const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
-
-          await supabaseClient.from("nfts_data").insert([{
-            img: urlData.publicUrl,
-            section: section,
-            type: type
-          }]);
-
-          count++;
-          document.getElementById("progressText").innerText = `${count}/${files.length}`;
-        } catch(e){ console.error(e); }
-      }
-
-      document.getElementById("loaderText").innerText = "✅ Upload Complete!";
-
-      setTimeout(() => {
-        document.getElementById("loader").style.display = "none";
-        closeUploadModal();
-        loadNFTs();
-      }, 1600);
-    }
-
-    function closeUploadModal(){
-      document.getElementById("uploadModal").style.display = "none";
-      document.getElementById("imageUpload").value = "";
-    }
-
-    function enterDeleteMode(){
-      deleteMode = true;
-      document.body.classList.add("delete-mode");
-      document.getElementById("bulkDeleteBar").style.display = "block";
-      renderCurrentGallery();
-    }
-
-    function exitDeleteMode(){
-      deleteMode = false;
-      selectedNFTs.clear();
-      document.body.classList.remove("delete-mode");
-      document.getElementById("bulkDeleteBar").style.display = "none";
-      renderCurrentGallery();
-    }
-
-    // ====================== EVENT LISTENERS ======================
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      if(isLoggedIn){
-        isLoggedIn = false;
-        document.getElementById("loginBtn").innerText = "LOGIN";
-        document.getElementById("uploadBtn").style.display = "none";
-        document.getElementById("deleteModeBtn").style.display = "none";
-        exitDeleteMode();
-        alert("Logged Out");
-        return;
-      }
-      const secret = prompt("Enter Secret Word");
-      if(secret === "tmkc" || secret === "Tmkc"){
-        isLoggedIn = true;
-        document.getElementById("loginBtn").innerText = "LOGOUT";
-        document.getElementById("uploadBtn").style.display = "block";
-        document.getElementById("deleteModeBtn").style.display = "block";
-        alert("Login Successful");
-      } else alert("Wrong Secret Word");
-    });
-
-    document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
-    document.getElementById("deleteModeBtn").addEventListener("click", () => deleteMode ? exitDeleteMode() : enterDeleteMode());
-
-    document.getElementById("nftSection").addEventListener("change", function(){
-      document.getElementById("totemType").style.display = this.value === "totems" ? "block" : "none";
-    });
-
-    document.getElementById("closePreview").onclick = () => document.getElementById("previewModal").style.display = "none";
-    document.getElementById("closeUpload").onclick = closeUploadModal;
-
-    window.onclick = (e) => {
-      if(e.target.id === "previewModal") document.getElementById("previewModal").style.display = "none";
-      if(e.target.id === "uploadModal") closeUploadModal();
+    const nft = {
+      id:item.id,
+      img:item.img + "?t=" + Date.now(),
+      section:item.section,
+      type:item.type
     };
 
-    // Navigation
-    document.getElementById("relicsBtn").addEventListener("click", () => {
-      document.getElementById("relics-section").classList.add("active");
-      document.getElementById("totems-section").classList.remove("active");
-      document.getElementById("relicsBtn").classList.add("active");
-      document.getElementById("totemsBtn").classList.remove("active");
-      renderCurrentGallery();
+    if(item.section === "relics"){
+      relicsData.push(nft);
+    }
+
+    else if(item.section === "totems"){
+
+      if(item.type === "best"){
+        totemsBestData.push(nft);
+      }
+
+      else if(item.type === "legendary"){
+        totemsLegendaryData.push(nft);
+      }
+    }
+  });
+
+  updateCounts();
+  renderAllGalleries();
+}
+
+function updateCounts(){
+  document.getElementById("relicsCount").innerText = `(${relicsData.length})`;
+  document.getElementById("bestCount").innerText = `(${totemsBestData.length})`;
+  document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
+}
+
+function renderAllGalleries(){
+  renderGallery("relics-gallery", relicsData);
+  renderGallery("totems-gallery", totemsBestData);
+}
+
+function renderGallery(containerId, data){
+
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  if(!data || data.length === 0){
+    container.innerHTML = `
+      <h2 style='text-align:center;width:100%;padding:40px;color:#ffaa00;'>
+        No NFTs Yet
+      </h2>
+    `;
+    return;
+  }
+
+  data.forEach(item => {
+
+    const card = document.createElement("div");
+    card.className = "nft-card";
+
+    card.innerHTML = `
+      <input type="checkbox" class="select-checkbox" data-id="${item.id}">
+      <img src="${item.img}" alt="NFT">
+    `;
+
+    card.querySelector(".select-checkbox")
+    .addEventListener("change",(e)=>{
+      toggleSelection(item.id,e.target.checked);
     });
 
-    document.getElementById("totemsBtn").addEventListener("click", () => {
-      document.getElementById("totems-section").classList.add("active");
-      document.getElementById("relics-section").classList.remove("active");
-      document.getElementById("totemsBtn").classList.add("active");
-      document.getElementById("relicsBtn").classList.remove("active");
-      renderCurrentGallery();
-    });
+    card.querySelector("img").onclick = () => {
 
-    document.getElementById("bestBtn").addEventListener("click", () => {
-      document.getElementById("bestBtn").classList.add("active");
-      document.getElementById("legendaryBtn").classList.remove("active");
-      renderCurrentGallery();
-    });
+      if(!deleteMode){
 
-    document.getElementById("legendaryBtn").addEventListener("click", () => {
-      document.getElementById("legendaryBtn").classList.add("active");
-      document.getElementById("bestBtn").classList.remove("active");
-      renderCurrentGallery();
-    });
+        document.getElementById("modalImage").src = item.img;
 
-    loadNFTs();
-  </script>
+        document.getElementById("previewModal").style.display = "flex";
+      }
+    };
+
+    container.appendChild(card);
+  });
+}
+
+function toggleSelection(id, checked){
+
+  if(checked){
+    selectedNFTs.add(id);
+  } else {
+    selectedNFTs.delete(id);
+  }
+
+  document.getElementById("selectedCount").innerText =
+    `${selectedNFTs.size} Selected`;
+}
+
+async function uploadNFTs(){
+
+  const files = document.getElementById("imageUpload").files;
+
+  if(files.length === 0){
+    alert("Please select images");
+    return;
+  }
+
+  document.getElementById("loader").style.display = "flex";
+  document.getElementById("loaderText").innerText = "Uploading NFTs...";
+  document.getElementById("progressText").innerText = `0/${files.length}`;
+
+  const section = document.getElementById("nftSection").value;
+  const totemType = document.getElementById("totemType").value;
+
+  let uploadedCount = 0;
+
+  for(let i=0;i<files.length;i++){
+
+    const file = files[i];
+
+    try{
+
+      const ext = file.name.split('.').pop();
+
+      const fileName =
+        `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+
+      const path = `${section}/${fileName}`;
+
+      const uploadResponse = await supabaseClient
+        .storage
+        .from("nfts")
+        .upload(path,file,{
+          upsert:true
+        });
+
+      if(uploadResponse.error){
+        console.error(uploadResponse.error);
+        continue;
+      }
+
+      const { data:urlData } = supabaseClient
+        .storage
+        .from("nfts")
+        .getPublicUrl(path);
+
+      const imageUrl = urlData.publicUrl;
+
+      const insertData = {
+        img:imageUrl,
+        section:section,
+        type: section === "totems" ? totemType : null
+      };
+
+      const { error:insertError } = await supabaseClient
+        .from("nfts_data")
+        .insert([insertData]);
+
+      if(insertError){
+        console.error(insertError);
+        continue;
+      }
+
+      uploadedCount++;
+
+      document.getElementById("progressText").innerText =
+        `${uploadedCount}/${files.length}`;
+
+    } catch(err){
+      console.error("Upload Error:",err);
+    }
+  }
+
+  document.getElementById("loaderText").innerText =
+    "✅ Upload Complete!";
+
+  document.getElementById("progressText").innerText =
+    `${uploadedCount} NFT(s) Uploaded`;
+
+  setTimeout(async ()=>{
+
+    document.getElementById("loader").style.display = "none";
+
+    closeUploadModal();
+
+    await loadNFTs();
+
+  },1200);
+}
+
+function closeUploadModal(){
+
+  document.getElementById("uploadModal").style.display = "none";
+
+  document.getElementById("imageUpload").value = "";
+}
+
+function enterDeleteMode(){
+
+  deleteMode = true;
+
+  document.body.classList.add("delete-mode");
+
+  document.getElementById("bulkDeleteBar").style.display = "block";
+
+  renderAllGalleries();
+}
+
+function exitDeleteMode(){
+
+  deleteMode = false;
+
+  selectedNFTs.clear();
+
+  document.body.classList.remove("delete-mode");
+
+  document.getElementById("bulkDeleteBar").style.display = "none";
+
+  renderAllGalleries();
+}
+
+async function deleteSelectedNFTs(){
+
+  if(selectedNFTs.size === 0){
+    alert("No NFTs Selected");
+    return;
+  }
+
+  const confirmDelete = confirm("Delete selected NFTs?");
+
+  if(!confirmDelete) return;
+
+  const ids = [...selectedNFTs];
+
+  const { error } = await supabaseClient
+    .from("nfts_data")
+    .delete()
+    .in("id", ids);
+
+  if(error){
+    console.error(error);
+    alert("Delete Failed");
+    return;
+  }
+
+  selectedNFTs.clear();
+
+  exitDeleteMode();
+
+  loadNFTs();
+}
+
+document.getElementById("loginBtn").addEventListener("click",()=>{
+
+  if(isLoggedIn){
+
+    isLoggedIn = false;
+
+    document.getElementById("loginBtn").innerText = "LOGIN";
+
+    document.getElementById("uploadBtn").style.display = "none";
+
+    document.getElementById("deleteModeBtn").style.display = "none";
+
+    exitDeleteMode();
+
+    alert("Logged Out");
+
+    return;
+  }
+
+  const secret = prompt("Enter Secret Word");
+
+  if(secret === "tmkc" || secret === "Tmkc"){
+
+    isLoggedIn = true;
+
+    document.getElementById("loginBtn").innerText = "LOGOUT";
+
+    document.getElementById("uploadBtn").style.display = "block";
+
+    document.getElementById("deleteModeBtn").style.display = "block";
+
+    alert("Login Successful");
+
+  } else {
+
+    alert("Wrong Secret Word");
+  }
+});
+
+document.getElementById("uploadBtn")
+.addEventListener("click",()=>{
+
+  document.getElementById("uploadModal").style.display = "flex";
+});
+
+document.getElementById("deleteModeBtn")
+.addEventListener("click",()=>{
+
+  deleteMode ? exitDeleteMode() : enterDeleteMode();
+});
+
+document.getElementById("nftSection")
+.addEventListener("change",function(){
+
+  document.getElementById("totemType").style.display =
+    this.value === "totems" ? "block" : "none";
+});
+
+document.getElementById("closePreview").onclick = ()=>{
+
+  document.getElementById("previewModal").style.display = "none";
+};
+
+document.getElementById("closeUpload").onclick =
+  closeUploadModal;
+
+window.onclick = (e)=>{
+
+  if(e.target.id === "previewModal"){
+    document.getElementById("previewModal").style.display = "none";
+  }
+
+  if(e.target.id === "uploadModal"){
+    closeUploadModal();
+  }
+};
+
+document.getElementById("relicsBtn")
+.addEventListener("click",()=>{
+
+  document.getElementById("relics-section")
+  .classList.add("active");
+
+  document.getElementById("totems-section")
+  .classList.remove("active");
+
+  document.getElementById("relicsBtn")
+  .classList.add("active");
+
+  document.getElementById("totemsBtn")
+  .classList.remove("active");
+
+  renderGallery("relics-gallery", relicsData);
+});
+
+document.getElementById("totemsBtn")
+.addEventListener("click",()=>{
+
+  document.getElementById("totems-section")
+  .classList.add("active");
+
+  document.getElementById("relics-section")
+  .classList.remove("active");
+
+  document.getElementById("totemsBtn")
+  .classList.add("active");
+
+  document.getElementById("relicsBtn")
+  .classList.remove("active");
+
+  renderGallery("totems-gallery", totemsBestData);
+});
+
+document.getElementById("bestBtn")
+.addEventListener("click",()=>{
+
+  document.getElementById("bestBtn")
+  .classList.add("active");
+
+  document.getElementById("legendaryBtn")
+  .classList.remove("active");
+
+  renderGallery("totems-gallery", totemsBestData);
+});
+
+document.getElementById("legendaryBtn")
+.addEventListener("click",()=>{
+
+  document.getElementById("legendaryBtn")
+  .classList.add("active");
+
+  document.getElementById("bestBtn")
+  .classList.remove("active");
+
+  renderGallery("totems-gallery", totemsLegendaryData);
+});
+
+loadNFTs();
+</script>
 </body>
 </html>
