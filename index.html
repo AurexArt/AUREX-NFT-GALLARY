@@ -582,23 +582,6 @@
         alert("Login Successful");
       } else alert("Wrong Secret Word");
     });
-
-        document.getElementById("deleteModeBtn")
-.addEventListener("click", async () => {
-
-  deleteMode = !deleteMode;
-
-  if(deleteMode){
-
-    document.body.classList.add("delete-mode");
-
-  }else{
-
-    document.body.classList.remove("delete-mode");
-  }
-
-  await loadNFTs();
-});
   
     document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("uploadModal").style.display = "flex");
 
@@ -642,7 +625,22 @@
       document.getElementById("bestBtn").classList.remove("active");
       renderGallery("totems-gallery", totemsLegendaryData);
     });
+    document.getElementById("deleteModeBtn")
+.addEventListener("click", async () => {
 
+  deleteMode = !deleteMode;
+
+  if(deleteMode){
+
+    document.body.classList.add("delete-mode");
+
+  }else{
+
+    document.body.classList.remove("delete-mode");
+  }
+
+  await loadNFTs();
+});
     loadNFTs();
   </script>
 </body>
