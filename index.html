@@ -10,15 +10,15 @@
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
     body{ 
-      background: #000000; 
-      color: #ffffff; 
+      background:#0a001f; 
+      color:white; 
       font-family:Arial,sans-serif; 
       overflow-x:hidden; 
     }
 
     header{ 
       text-align:center; 
-      padding:80px 20px 30px; 
+      padding:80px 20px 30px; /* Title ko thoda niche kiya */
       position:relative; 
     }
     
@@ -36,35 +36,30 @@
       top:20px; 
       right:20px; 
       display:flex; 
-      gap:12px; 
+      gap:10px; 
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     button{
-      padding:12px 26px; 
+      padding:12px 24px; 
       background:transparent; 
-      border:2px solid; 
+      border:2px solid #ff8800;
+      color:#ffaa00; 
       border-radius:50px; 
       cursor:pointer; 
       font-weight:bold; 
       transition:0.3s;
     }
     button:hover{ 
+      background:#ff8800; 
+      color:black; 
       transform:scale(1.05); 
-      filter: brightness(1.15);
     }
 
-    #loginBtn { border-color: #ffd700; color: #ffd700; }
-    #loginBtn:hover { border-color: #ffea80; box-shadow: 0 0 15px #ffd700; }
-
-    #uploadBtn { border-color: #ffaa00; color: #ffaa00; }
-    #uploadBtn:hover { border-color: #ffc266; box-shadow: 0 0 15px #ffaa00; }
-
-    #deleteModeBtn { border-color: #ff6600; color: #ff6600; }
-    #deleteModeBtn:hover { border-color: #ff8833; box-shadow: 0 0 15px #ff6600; }
-
-    .nav-btn { border-color: #ffbb33; color: #ffbb33; }
-    .nav-btn.active, .nav-btn:hover { 
-      border-color: #ffdd77; color: #ffdd77; box-shadow: 0 0 12px #ffbb33;
+    .🗑️{
+      background:#ff8800 !important;
+      color:black !important;
     }
 
     .nav{ 
@@ -72,70 +67,14 @@
       justify-content:center; 
       gap:20px; 
       padding:20px; 
-      background:#0a0a0a; 
+      background:#140029; 
       flex-wrap:wrap; 
     }
-
-    .modal{
-      display:none; 
-      position:fixed; 
-      inset:0; 
-      background:rgba(0,0,0,0.97);
-      z-index:1000; 
-      justify-content:center; 
-      align-items:center; 
-      padding:15px;
+    .nav-btn.active{ 
+      background:#ff8800; 
+      border-color:#ff8800; 
+      color:black; 
     }
-
-    .modal-content{
-      background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
-      width:100%; 
-      max-width:620px; 
-      padding:35px 30px; 
-      position:relative;
-      border-radius:24px;
-      border: 2px solid #ff8800;
-      box-shadow: 0 0 40px rgba(255, 136, 0, 0.3);
-    }
-
-    .modal h2{
-      color:#ffaa00;
-      text-align:center;
-      margin-bottom:25px;
-      font-size:1.8rem;
-    }
-
-    input[type="file"], select{
-      width:100%;
-      padding:12px;
-      background:#111;
-      border:2px solid #444;
-      border-radius:12px;
-      color:#fff;
-      margin:12px 0;
-    }
-
-    input[type="file"] { border-style: dashed; }
-
-    .modal-buttons{
-      margin-top:30px;
-      display:flex;
-      justify-content:center;
-      gap:15px;
-    }
-
-    .bulk-delete-bar {
-      position: sticky;
-      top: 0;
-      background: #0a0a0a;
-      padding: 15px 20px;
-      text-align: center;
-      border-bottom: 2px solid #ff6600;
-      display: none;
-      z-index: 100;
-    }
-
-    #selectedCount { color: #ffdd88; font-size: 1.15rem; font-weight: bold; }
 
     .section{ display:none; }
     .section.active{ display:block; }
@@ -146,7 +85,15 @@
       text-align:center;
       font-size:1.6rem; 
       font-weight:bold; 
-      color:#ffcc66;
+      color:#ffaa00;
+    }
+
+    /* Count Style */
+    .section-count {
+      font-size: 1.1rem;
+      color: #ffcc66;
+      margin-top: 8px;
+      font-weight: normal;
     }
 
     .gallery{
@@ -154,13 +101,13 @@
       padding:8px; 
       display:grid; 
       grid-template-columns:repeat(3,1fr); 
-      gap:10px;
+      gap:8px;
     }
     .nft-card{
-      background:#111111; 
+      background:#1d0037; 
       border-radius:12px; 
       overflow:hidden; 
-      border:1px solid #444;
+      border:1px solid #442200;
       position:relative;
     }
     .nft-card img{
@@ -171,47 +118,110 @@
       cursor:pointer;
     }
 
-    /* ================== STRONG ERROR BOX ================== */
-    .error-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(20,0,0,0.95);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: #ff5555;
-      z-index: 10;
-      text-align: center;
-      padding: 15px;
-    }
-    .nft-card.error .error-overlay { display: flex; }
-    .error-overlay h4 { margin:8px 0 5px; font-size:1.1rem; }
-    .error-overlay small { color:#ffaa99; }
-
     .select-checkbox {
       position: absolute;
       top: 12px;
       right: 12px;
       width: 24px;
       height: 24px;
-      z-index: 20;
+      z-index: 10;
       accent-color: #ffaa00;
       display: none;
     }
 
-    .delete-mode .select-checkbox { display: block; }
+    .delete-mode .select-checkbox {
+      display: block;
+    }
 
-    @media(min-width:768px){ .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } }
-    @media(min-width:1024px){ .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } }
+    @media(min-width:768px){ 
+      .gallery{ grid-template-columns:repeat(5,1fr); gap:12px; } 
+    }
+    @media(min-width:1024px){ 
+      .gallery{ grid-template-columns:repeat(6,1fr); gap:15px; padding:20px; } 
+    }
+
+    /* Tight Preview Modal */
+    .modal{
+      display:none; 
+      position:fixed; 
+      inset:0; 
+      background:rgba(0,0,0,0.95);
+      z-index:1000; 
+      justify-content:center; 
+      align-items:center; 
+      padding:15px;
+    }
+
+    .modal-content{
+      background:#0f0022; 
+      width:100%; 
+      max-width:680px; 
+      padding:12px; 
+      position:relative;
+      border-radius:18px;
+      border: none;
+      box-shadow: none;
+    }
 
     .close{
       position:absolute; 
-      top:12px; 
-      right:25px; 
-      font-size:40px;
+      top:8px; 
+      right:18px; 
+      font-size:38px;
       cursor:pointer; 
       color:#ffaa00;
+      z-index: 11;
+    }
+    .close:hover{ 
+      color:#ffcc66; 
+      transform:rotate(90deg); 
+    }
+
+    .modal-content img{
+      width:100%; 
+      max-height:78vh; 
+      object-fit:contain; 
+      border-radius:12px;
+      background:#0a001f;
+      display: block;
+    }
+
+    .bulk-delete-bar {
+      position: sticky;
+      top: 0;
+      background: #1a0033;
+      padding: 12px 20px;
+      text-align: center;
+      border-bottom: 2px solid #ff8800;
+      display: none;
+      z-index: 100;
+    }
+
+    .loader-overlay{
+      position:fixed; 
+      inset:0; 
+      background:rgba(0,0,0,0.94);
+      display:none; 
+      justify-content:center; 
+      align-items:center;
+      flex-direction:column; 
+      z-index:99999;
+    }
+    .loader{
+      width:80px; 
+      height:80px; 
+      border:7px solid #333;
+      border-top:7px solid #ffaa00; 
+      border-radius:50%; 
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{ 100%{ transform:rotate(360deg); } }
+
+    .loader-text{ 
+      margin-top:25px; 
+      color:#ffaa00; 
+      font-size:1.5rem; 
+      font-weight:bold; 
     }
   </style>
 </head>
@@ -222,14 +232,14 @@
     <div class="header-buttons">
       <button id="loginBtn">LOGIN</button>
       <button id="uploadBtn" style="display:none;">UPLOAD NFT</button>
-      <button id="deleteModeBtn" style="display:none;">🗑️</button>
+      <button id="deleteModeBtn" style="display:none;">ENTER DELETE MODE</button>
     </div>
   </header>
 
   <div class="bulk-delete-bar" id="bulkDeleteBar">
-    <span id="selectedCount">0 Selected</span>
-    <button onclick="deleteSelectedNFTs()">DELETE SELECTED</button>
-    <button onclick="exitDeleteMode()">CANCEL</button>
+    <span id="selectedCount" style="margin-right:20px; font-weight:bold;">0 Selected</span>
+    <button onclick="deleteSelectedNFTs()" style="background:#ff0033; color:white; border:none;">DELETE SELECTED</button>
+    <button onclick="exitDeleteMode()" style="margin-left:12px;">CANCEL</button>
   </div>
 
   <nav class="nav">
@@ -250,26 +260,32 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
+  <!-- Upload Modal -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
-      <h2>✦ UPLOAD NEW NFT ✦</h2>
+      <h2 style="color:#ffaa00; text-align:center; margin-bottom:25px;">✦ UPLOAD NEW NFT ✦</h2>
+      
       <input type="file" id="imageUpload" accept="image/*" multiple/>
-      <select id="nftSection">
+      
+      <select id="nftSection" style="margin:15px 0; padding:10px; width:100%;">
         <option value="relics">Relics</option>
         <option value="totems">Totems</option>
       </select>
-      <select id="totemType" style="display:none;">
+      
+      <select id="totemType" style="display:none; margin-bottom:15px; padding:10px; width:100%;">
         <option value="best">Best</option>
         <option value="legendary">Legendary</option>
       </select>
-      <div class="modal-buttons">
+      
+      <div style="margin-top:30px; text-align:center;">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
       </div>
     </div>
   </div>
 
+  <!-- Preview Modal -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
@@ -277,10 +293,10 @@
     </div>
   </div>
 
+  <!-- Loader -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
-    <div class="loader-text" id="loaderText">Uploading NFTs...</div>
-    <div class="progress-text" id="progressText">0/0</div>
+    <div class="loader-text" id="loaderText">Processing...</div>
   </div>
 
   <script>
@@ -289,7 +305,9 @@
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let relicsData = [], totemsBestData = [], totemsLegendaryData = [];
+    let relicsData = [];
+    let totemsBestData = [];
+    let totemsLegendaryData = [];
     let isLoggedIn = false;
     let deleteMode = false;
     let selectedNFTs = new Set();
@@ -297,7 +315,9 @@
     async function loadNFTs(){
       const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
 
-      relicsData = []; totemsBestData = []; totemsLegendaryData = [];
+      relicsData = [];
+      totemsBestData = [];
+      totemsLegendaryData = [];
 
       data.forEach(item => {
         const nft = { id: item.id, img: item.img, section: item.section, type: item.type };
@@ -318,6 +338,11 @@
       document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
     }
 
+    function renderAllGalleries(){
+      renderGallery("relics-gallery", relicsData);
+      renderGallery("totems-gallery", totemsBestData);
+    }
+
     function renderGallery(containerId, data){
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -331,29 +356,15 @@
         const card = document.createElement("div");
         card.className = "nft-card";
         
-        const img = document.createElement("img");
-        img.src = item.img;
-        img.alt = "NFT";
-
-        img.onerror = function() {
-          card.classList.add("error");
-          console.error("Image Load Failed → ID:", item.id, "URL:", item.img);
-        };
-
         card.innerHTML = `
           <input type="checkbox" class="select-checkbox" data-id="${item.id}">
-          <div class="error-overlay">
-            <h4>❌ IMAGE NOT LOADING</h4>
-            <small>Check F12 Console for details</small>
-          </div>
+          <img src="${item.img}" alt="NFT">
         `;
-        card.insertBefore(img, card.firstChild);
 
-        card.querySelector(".select-checkbox").addEventListener("change", (e) => {
-          toggleSelection(item.id, e.target.checked);
-        });
+        const checkbox = card.querySelector(".select-checkbox");
+        checkbox.addEventListener("change", () => toggleSelection(item.id, checkbox.checked));
 
-        img.onclick = () => {
+        card.querySelector("img").onclick = () => {
           if(!deleteMode){
             document.getElementById("modalImage").src = item.img;
             document.getElementById("previewModal").style.display = "flex";
@@ -364,70 +375,45 @@
       });
     }
 
-    function renderAllGalleries(){
-      renderGallery("relics-gallery", relicsData);
-      renderGallery("totems-gallery", totemsBestData);
-    }
-
-    function toggleSelection(id, checked){
-      if(checked) selectedNFTs.add(id);
+    function toggleSelection(id, isChecked){
+      if(isChecked) selectedNFTs.add(id);
       else selectedNFTs.delete(id);
       document.getElementById("selectedCount").innerText = `${selectedNFTs.size} Selected`;
     }
 
-    async function uploadNFTs(){
-      const files = document.getElementById("imageUpload").files;
-      if(files.length === 0) return alert("Please select at least one image");
+    async function deleteSelectedNFTs(){
+      if(selectedNFTs.size === 0) return;
+      if(!confirm(`Delete ${selectedNFTs.size} NFTs permanently?`)) return;
 
       document.getElementById("loader").style.display = "flex";
-      document.getElementById("loaderText").innerText = "Uploading NFTs...";
-      document.getElementById("progressText").innerText = `0/${files.length}`;
+      document.getElementById("loaderText").innerText = "Deleting NFTs...";
 
-      const section = document.getElementById("nftSection").value;
-      const totemType = document.getElementById("totemType").value;
-
-      let uploadedCount = 0;
-
-      for(let i = 0; i < files.length; i++){
-        const file = files[i];
-        try{
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`;
-          const path = `${section}/${fileName}`;
-
-          await supabaseClient.storage.from("nfts").upload(path, file, { upsert: true });
-          const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
-
-          console.log("%c✅ Uploaded:", "color:green", urlData.publicUrl);
-
-          await supabaseClient.from("nfts_data").insert([{
-            img: urlData.publicUrl,
-            section: section,
-            type: totemType || null
-          }]);
-
-          uploadedCount++;
-          document.getElementById("progressText").innerText = `${uploadedCount}/${files.length}`;
-        } catch(err){
-          console.error(err);
-        }
+      for(let id of selectedNFTs){
+        try {
+          const { data: nft } = await supabaseClient.from("nfts_data").select("img").eq("id", id).single();
+          if(nft && nft.img){
+            const imagePath = nft.img.split("/nfts/")[1];
+            if(imagePath) await supabaseClient.storage.from("nfts").remove([imagePath]);
+          }
+          await supabaseClient.from("nfts_data").delete().eq("id", id);
+        } catch(err){ console.error(err); }
       }
 
-      document.getElementById("loaderText").innerText = "✅ Upload Complete!";
+      selectedNFTs.clear();
+      document.getElementById("loaderText").innerText = "✅ Deletion Complete!";
+      
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
-        closeUploadModal();
+        exitDeleteMode();
         loadNFTs();
       }, 1500);
-    }
-
-    function closeUploadModal(){
-      document.getElementById("uploadModal").style.display = "none";
-      document.getElementById("imageUpload").value = "";
     }
 
     function enterDeleteMode(){
       deleteMode = true;
       document.body.classList.add("delete-mode");
+      document.getElementById("deleteModeBtn").innerText = "EXIT DELETE MODE";
+      document.getElementById("deleteModeBtn").classList.add("delete-mode-btn");
       document.getElementById("bulkDeleteBar").style.display = "block";
       renderAllGalleries();
     }
@@ -436,11 +422,13 @@
       deleteMode = false;
       selectedNFTs.clear();
       document.body.classList.remove("delete-mode");
+      document.getElementById("deleteModeBtn").innerText = "ENTER DELETE MODE";
+      document.getElementById("deleteModeBtn").classList.remove("delete-mode-btn");
       document.getElementById("bulkDeleteBar").style.display = "none";
       renderAllGalleries();
     }
 
-    // Login, Navigation etc. same as your code
+    // Login
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -469,13 +457,14 @@
     });
 
     document.getElementById("closePreview").onclick = () => document.getElementById("previewModal").style.display = "none";
-    document.getElementById("closeUpload").onclick = closeUploadModal;
+    document.getElementById("closeUpload").onclick = () => document.getElementById("uploadModal").style.display = "none";
 
     window.onclick = (e) => {
       if(e.target.id === "previewModal") document.getElementById("previewModal").style.display = "none";
-      if(e.target.id === "uploadModal") closeUploadModal();
+      if(e.target.id === "uploadModal") document.getElementById("uploadModal").style.display = "none";
     };
 
+    // Navigation
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
