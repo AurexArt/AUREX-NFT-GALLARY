@@ -53,7 +53,6 @@
       filter: brightness(1.15);
     }
 
-    /* Header Buttons */
     #loginBtn { border-color: #ffd700; color: #ffd700; }
     #loginBtn:hover { border-color: #ffea80; box-shadow: 0 0 15px #ffd700; }
 
@@ -77,7 +76,6 @@
       flex-wrap:wrap; 
     }
 
-    /* Upload Modal - More Attractive */
     .modal{
       display:none; 
       position:fixed; 
@@ -107,19 +105,9 @@
       font-size:1.8rem;
     }
 
-    input[type="file"]{
+    input[type="file"], select{
       width:100%;
       padding:12px;
-      background:#111;
-      border:2px dashed #ff8800;
-      border-radius:12px;
-      color:#fff;
-      margin-bottom:20px;
-    }
-
-    select{
-      width:100%;
-      padding:14px;
       background:#111;
       border:2px solid #444;
       border-radius:12px;
@@ -127,15 +115,15 @@
       margin:12px 0;
     }
 
+    input[type="file"] { border-style: dashed; }
+
     .modal-buttons{
       margin-top:30px;
       display:flex;
       justify-content:center;
       gap:15px;
-      flex-wrap: wrap;
     }
 
-    /* Bulk Delete Bar */
     .bulk-delete-bar {
       position: sticky;
       top: 0;
@@ -149,9 +137,6 @@
 
     #selectedCount { color: #ffdd88; font-size: 1.15rem; font-weight: bold; }
 
-    .bulk-delete-bar button:first-of-type { background: #ff4400; color: white; border: none; }
-    .bulk-delete-bar button:last-of-type { border: 2px solid #ffaa00; color: #ffaa00; }
-
     .section{ display:none; }
     .section.active{ display:block; }
 
@@ -163,8 +148,6 @@
       font-weight:bold; 
       color:#ffcc66;
     }
-
-    .section-count { color: #ffdd88; }
 
     .gallery{
       width:100%; 
@@ -188,23 +171,23 @@
       cursor:pointer;
     }
 
-    /* ================== ERROR SYSTEM ================== */
+    /* ================== STRONG ERROR BOX ================== */
     .error-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.92);
+      background: rgba(20,0,0,0.95);
       display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: #ff4444;
-      z-index: 5;
+      color: #ff5555;
+      z-index: 10;
       text-align: center;
-      padding: 10px;
+      padding: 15px;
     }
     .nft-card.error .error-overlay { display: flex; }
-    .error-overlay h4 { margin: 5px 0; font-size: 1.1rem; }
-    .error-overlay small { color: #ffaa88; font-size: 0.85rem; }
+    .error-overlay h4 { margin:8px 0 5px; font-size:1.1rem; }
+    .error-overlay small { color:#ffaa99; }
 
     .select-checkbox {
       position: absolute;
@@ -212,7 +195,7 @@
       right: 12px;
       width: 24px;
       height: 24px;
-      z-index: 10;
+      z-index: 20;
       accent-color: #ffaa00;
       display: none;
     }
@@ -229,41 +212,6 @@
       font-size:40px;
       cursor:pointer; 
       color:#ffaa00;
-    }
-    .close:hover{ color:#ffcc66; transform:rotate(90deg); }
-
-    .modal-content img{
-      width:100%; 
-      max-height:78vh; 
-      object-fit:contain; 
-      border-radius:12px;
-      background:#000;
-    }
-
-    .loader-overlay{
-      position:fixed; 
-      inset:0; 
-      background:rgba(0,0,0,0.95);
-      display:none; 
-      justify-content:center; 
-      align-items:center;
-      flex-direction:column; 
-      z-index:99999;
-    }
-    .loader{
-      width:80px; height:80px; 
-      border:7px solid #333;
-      border-top:7px solid #ffaa00; 
-      border-radius:50%; 
-      animation:spin 1s linear infinite;
-    }
-    @keyframes spin{ 100%{ transform:rotate(360deg); } }
-
-    .loader-text{ 
-      margin-top:25px; 
-      color:#ffaa00; 
-      font-size:1.5rem; 
-      font-weight:bold; 
     }
   </style>
 </head>
@@ -302,24 +250,19 @@
     <div class="gallery" id="totems-gallery"></div>
   </section>
 
-  <!-- === IMPROVED UPLOAD MODAL === -->
   <div class="modal" id="uploadModal">
     <div class="modal-content">
       <span class="close" id="closeUpload">&times;</span>
       <h2>✦ UPLOAD NEW NFT ✦</h2>
-      
       <input type="file" id="imageUpload" accept="image/*" multiple/>
-      
       <select id="nftSection">
         <option value="relics">Relics</option>
         <option value="totems">Totems</option>
       </select>
-      
       <select id="totemType" style="display:none;">
         <option value="best">Best</option>
         <option value="legendary">Legendary</option>
       </select>
-      
       <div class="modal-buttons">
         <button onclick="uploadNFTs()">UPLOAD NOW</button>
         <button onclick="closeUploadModal()">CANCEL</button>
@@ -327,7 +270,6 @@
     </div>
   </div>
 
-  <!-- Preview Modal -->
   <div class="modal" id="previewModal">
     <div class="modal-content">
       <span class="close" id="closePreview">&times;</span>
@@ -335,7 +277,6 @@
     </div>
   </div>
 
-  <!-- Loader -->
   <div class="loader-overlay" id="loader">
     <div class="loader"></div>
     <div class="loader-text" id="loaderText">Uploading NFTs...</div>
@@ -377,11 +318,6 @@
       document.getElementById("legendaryCount").innerText = `(${totemsLegendaryData.length})`;
     }
 
-    function renderAllGalleries(){
-      renderGallery("relics-gallery", relicsData);
-      renderGallery("totems-gallery", totemsBestData);
-    }
-
     function renderGallery(containerId, data){
       const container = document.getElementById(containerId);
       container.innerHTML = "";
@@ -394,34 +330,43 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.className = "nft-card";
+        
+        const img = document.createElement("img");
+        img.src = item.img;
+        img.alt = "NFT";
+
+        img.onerror = function() {
+          card.classList.add("error");
+          console.error("Image Load Failed → ID:", item.id, "URL:", item.img);
+        };
+
         card.innerHTML = `
           <input type="checkbox" class="select-checkbox" data-id="${item.id}">
-          <img src="${item.img}" alt="NFT" onerror="showImageError(this, '${item.img}', ${item.id})">
           <div class="error-overlay">
-            <h4>❌ Image Not Loading</h4>
-            <small id="err-${item.id}">Check Console (F12) for details</small>
+            <h4>❌ IMAGE NOT LOADING</h4>
+            <small>Check F12 Console for details</small>
           </div>
         `;
+        card.insertBefore(img, card.firstChild);
 
         card.querySelector(".select-checkbox").addEventListener("change", (e) => {
           toggleSelection(item.id, e.target.checked);
         });
 
-        card.querySelector("img").onclick = () => {
+        img.onclick = () => {
           if(!deleteMode){
             document.getElementById("modalImage").src = item.img;
             document.getElementById("previewModal").style.display = "flex";
           }
         };
+
         container.appendChild(card);
       });
     }
 
-    // ================== ERROR FUNCTION ==================
-    function showImageError(imgElement, url, id) {
-      const card = imgElement.parentElement;
-      card.classList.add("error");
-      console.error("❌ Image Load Failed for ID:", id, " | URL:", url);
+    function renderAllGalleries(){
+      renderGallery("relics-gallery", relicsData);
+      renderGallery("totems-gallery", totemsBestData);
     }
 
     function toggleSelection(id, checked){
@@ -430,7 +375,6 @@
       document.getElementById("selectedCount").innerText = `${selectedNFTs.size} Selected`;
     }
 
-    // ================== FIXED UPLOAD FUNCTION ==================
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
       if(files.length === 0) return alert("Please select at least one image");
@@ -453,7 +397,7 @@
           await supabaseClient.storage.from("nfts").upload(path, file, { upsert: true });
           const { data: urlData } = supabaseClient.storage.from("nfts").getPublicUrl(path);
 
-          console.log("✅ Uploaded URL:", urlData.publicUrl);
+          console.log("%c✅ Uploaded:", "color:green", urlData.publicUrl);
 
           await supabaseClient.from("nfts_data").insert([{
             img: urlData.publicUrl,
@@ -469,13 +413,11 @@
       }
 
       document.getElementById("loaderText").innerText = "✅ Upload Complete!";
-      document.getElementById("progressText").innerText = `${uploadedCount} NFT(s) Uploaded`;
-
       setTimeout(() => {
         document.getElementById("loader").style.display = "none";
         closeUploadModal();
         loadNFTs();
-      }, 1800);
+      }, 1500);
     }
 
     function closeUploadModal(){
@@ -498,7 +440,7 @@
       renderAllGalleries();
     }
 
-    // Login
+    // Login, Navigation etc. same as your code
     document.getElementById("loginBtn").addEventListener("click", () => {
       if(isLoggedIn){
         isLoggedIn = false;
@@ -534,7 +476,6 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation
     document.getElementById("relicsBtn").addEventListener("click", () => {
       document.getElementById("relics-section").classList.add("active");
       document.getElementById("totems-section").classList.remove("active");
