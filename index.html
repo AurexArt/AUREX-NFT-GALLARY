@@ -427,6 +427,7 @@
     let totemsBestData = [];
     let totemsLegendaryData = [];
     let isLoggedIn = false;
+    let deleteMode = false;
 
     async function loadNFTs(){
       const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
@@ -564,10 +565,15 @@
 
     // Login, Navigation, etc. (same)
     document.getElementById("loginBtn").addEventListener("click", () => {
-      if(isLoggedIn){
+      if(isLoggedIn && deleteMode){
         isLoggedIn = false;
         document.getElementById("loginBtn").innerText = "LOGIN";
         document.getElementById("uploadBtn").style.display = "none";
+        document.getElementById("deleteModeBtn").style.display = "none";
+
+deleteMode = false;
+
+document.body.classList.remove("delete-mode");
         loadNFTs();
         alert("Logged Out");
         return;
