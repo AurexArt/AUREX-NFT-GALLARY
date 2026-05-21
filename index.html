@@ -389,8 +389,34 @@
       if(e.target.id === "uploadModal") closeUploadModal();
     };
 
-    // Navigation buttons (same logic)
-    // ... (baaki navigation code same rakha hai)
+   // Navigation (same as before)
+    document.getElementById("relicsBtn").addEventListener("click", () => {
+      document.getElementById("relics-section").classList.add("active");
+      document.getElementById("totems-section").classList.remove("active");
+      document.getElementById("relicsBtn").classList.add("active");
+      document.getElementById("totemsBtn").classList.remove("active");
+      renderGallery("relics-gallery", relicsData);
+    });
+
+    document.getElementById("totemsBtn").addEventListener("click", () => {
+      document.getElementById("totems-section").classList.add("active");
+      document.getElementById("relics-section").classList.remove("active");
+      document.getElementById("totemsBtn").classList.add("active");
+      document.getElementById("relicsBtn").classList.remove("active");
+      renderGallery("totems-gallery", totemsBestData);
+    });
+
+    document.getElementById("bestBtn").addEventListener("click", () => {
+      document.getElementById("bestBtn").classList.add("active");
+      document.getElementById("legendaryBtn").classList.remove("active");
+      renderGallery("totems-gallery", totemsBestData);
+    });
+
+    document.getElementById("legendaryBtn").addEventListener("click", () => {
+      document.getElementById("legendaryBtn").classList.add("active");
+      document.getElementById("bestBtn").classList.remove("active");
+      renderGallery("totems-gallery", totemsLegendaryData);
+    });
 
     loadNFTs();
   </script>
