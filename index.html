@@ -456,30 +456,47 @@
     let deleteMode = false;
 
     async function loadNFTs(){
-      const { data } = await supabaseClient.from("nfts_data").select("*").order("id", { ascending: false });
+  const { data } = await supabaseClient
+    .from("nfts_data")
+    .select("*")
+    .order("id", { ascending: false });
 
-      relicsData = [];
-      totemsBestData = [];
-      totemsLegendaryData = [];
+  relicsData = [];
+  totemsBestData = [];
+  totemsLegendaryData = [];
 
-      data.forEach(item => {
-        const nft = { id: item.id, img: item.img, section: item.section, type: item.type };
-        if (item.section === "relics") relicsData.push(nft);
-        else if (item.section === "totems") {
-          if (item.type === "best") totemsBestData.push(nft);
-          else if (item.type === "legendary") totemsLegendaryData.push(nft);
-        }
-      });
+  data.forEach(item => {
+    const nft = {
+      id: item.id,
+      img: item.img,
+      section: item.section,
+      type: item.type
+    };
 
-      renderGallery("relics-gallery", relicsData);
-      renderGallery("totems-gallery", totemsBestData);
+    if (item.section === "relics") {
+      relicsData.push(nft);
+
+    } else if (item.section === "totems") {
+
+      if (item.type === "best") {
+        totemsBestData.push(nft);
+
+      } else if (item.type === "legendary") {
+        totemsLegendaryData.push(nft);
+      }
     }
+  });
 
-      document.getElementById("relicsCount").innerText = relicsData.length;
+  renderGallery("relics-gallery", relicsData);
+  renderGallery("totems-gallery", totemsBestData);
 
-      document.getElementById("bestCount").innerText = totemsBestData.length;
+  // COUNTS
+  document.getElementById("relicsCount").innerText = relicsData.length;
 
-      document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
+  document.getElementById("bestCount").innerText = totemsBestData.length;
+
+  document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
+}
   
     function renderGallery(containerId, data){
       const container = document.getElementById(containerId);
