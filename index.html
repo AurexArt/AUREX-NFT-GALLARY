@@ -450,7 +450,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let relicsData = [];
-    let totemsBestData = [];
+    let totemsSPECIALData = [];
     let totemsLegendaryData = [];
     let isLoggedIn = false;
     let deleteMode = false;
@@ -493,7 +493,7 @@
   // COUNTS
   document.getElementById("relicsCount").innerText = relicsData.length;
 
-  document.getElementById("bestCount").innerText = totemsSPECIALData.length;
+  document.getElementById("SPECIALCount").innerText = totemsSPECIALData.length;
 
   document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
 }
@@ -666,13 +666,13 @@ document.body.classList.remove("delete-mode");
       document.getElementById("relics-section").classList.remove("active");
       document.getElementById("totemsBtn").classList.add("active");
       document.getElementById("relicsBtn").classList.remove("active");
-      renderGallery("totems-gallery", totemsBestData);
+      renderGallery("totems-gallery", totemsSPECIALData);
     });
 
     document.getElementById("SPECIALBtn").addEventListener("click", () => {
       document.getElementById("SPECIALBtn").classList.add("active");
       document.getElementById("legendaryBtn").classList.remove("active");
-      renderGallery("totems-gallery", totemsBestData);
+      renderGallery("totems-gallery", totemsSPECIALData);
     });
 
     document.getElementById("legendaryBtn").addEventListener("click", () => {
