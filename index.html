@@ -360,8 +360,8 @@
 
   <div style="text-align:center;padding:20px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap;">
 
-    <button class="nav-btn active" id="bestBtn">
-  BEST (<span id="bestCount">0</span>)
+    <button class="nav-btn active" id="SPECIALBtn">
+  SPECIAL (<span id="bestCount">0</span>)
 </button>
 
     <button class="nav-btn" id="legendaryBtn">
@@ -393,7 +393,7 @@
     </select>
 
     <select id="totemType" style="display:none;">
-      <option value="best">Best</option>
+      <option value="best">SPECIAL</option>
       <option value="legendary">Legendary</option>
     </select>
 
@@ -488,12 +488,12 @@
   });
 
   renderGallery("relics-gallery", relicsData);
-  renderGallery("totems-gallery", totemsBestData);
+  renderGallery("totems-gallery", totemsSPECIALData);
 
   // COUNTS
   document.getElementById("relicsCount").innerText = relicsData.length;
 
-  document.getElementById("bestCount").innerText = totemsBestData.length;
+  document.getElementById("bestCount").innerText = totemsSPECIALData.length;
 
   document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
 }
@@ -669,15 +669,15 @@ document.body.classList.remove("delete-mode");
       renderGallery("totems-gallery", totemsBestData);
     });
 
-    document.getElementById("bestBtn").addEventListener("click", () => {
-      document.getElementById("bestBtn").classList.add("active");
+    document.getElementById("SPECIALBtn").addEventListener("click", () => {
+      document.getElementById("SPECIALBtn").classList.add("active");
       document.getElementById("legendaryBtn").classList.remove("active");
       renderGallery("totems-gallery", totemsBestData);
     });
 
     document.getElementById("legendaryBtn").addEventListener("click", () => {
       document.getElementById("legendaryBtn").classList.add("active");
-      document.getElementById("bestBtn").classList.remove("active");
+      document.getElementById("SPECIALBtn").classList.remove("active");
       renderGallery("totems-gallery", totemsLegendaryData);
     });
     document.getElementById("deleteModeBtn")
