@@ -361,7 +361,7 @@
   <div style="text-align:center;padding:20px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap;">
 
     <button class="nav-btn active" id="SPECIALBtn">
-  SPECIAL (<span id="bestCount">0</span>)
+  SPECIAL (<span id="SPECIALCount">0</span>)
 </button>
 
     <button class="nav-btn" id="legendaryBtn">
@@ -393,7 +393,7 @@
     </select>
 
     <select id="totemType" style="display:none;">
-      <option value="best">SPECIAL</option>
+      <option value="SPECIAL">SPECIAL</option>
       <option value="legendary">Legendary</option>
     </select>
 
@@ -462,7 +462,7 @@
     .order("id", { ascending: false });
 
   relicsData = [];
-  totemsBestData = [];
+  totemsSPECIALData = [];
   totemsLegendaryData = [];
 
   data.forEach(item => {
@@ -478,7 +478,7 @@
 
     } else if (item.section === "totems") {
 
-      if (item.type === "best") {
+      if (item.type === "SPECIAL") {
         totemsSPECIALData.push(nft);
 
       } else if (item.type === "legendary") {
