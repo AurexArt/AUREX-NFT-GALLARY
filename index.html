@@ -337,8 +337,8 @@
 <nav class="nav">
 
   <button class="nav-btn active" id="relicsBtn">
-    RELICS
-  </button>
+  RELICS (<span id="relicsCount">0</span>)
+</button>
 
   <button class="nav-btn" id="totemsBtn">
     TOTEMS
@@ -361,12 +361,12 @@
   <div style="text-align:center;padding:20px;display:flex;justify-content:center;gap:30px;flex-wrap:wrap;">
 
     <button class="nav-btn active" id="bestBtn">
-      BEST
-    </button>
+  BEST (<span id="bestCount">0</span>)
+</button>
 
     <button class="nav-btn" id="legendaryBtn">
-      LEGENDARY
-    </button>
+  LEGENDARY (<span id="legendaryCount">0</span>)
+</button>
 
   </div>
 
@@ -475,6 +475,12 @@
       renderGallery("totems-gallery", totemsBestData);
     }
 
+      document.getElementById("relicsCount").innerText = relicsData.length;
+
+      document.getElementById("bestCount").innerText = totemsBestData.length;
+
+      document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
+  
     function renderGallery(containerId, data){
       const container = document.getElementById(containerId);
       container.innerHTML = "";
