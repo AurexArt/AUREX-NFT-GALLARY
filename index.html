@@ -497,68 +497,81 @@
 
   document.getElementById("legendaryCount").innerText = totemsLegendaryData.length;
 }
+    let selectedNFTs = [];
   
     function renderGallery(containerId, data){
-      const container = document.getElementById(containerId);
-      container.innerHTML = "";
 
-      if(data.length === 0){
-        container.innerHTML = "<h2 style='text-align:center;width:100%;padding:40px;'>No NFTs Yet</h2>";
-        return;
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  if(data.length === 0){
+    container.innerHTML =
+      "<h2 style='text-align:center;width:100%;padding:40px;'>No NFTs Yet</h2>";
+    return;
+  }
+
+  data.forEach(item => {
+
+    const card = document.createElement("div");
+    card.className = "nft-card";
+
+    card.innerHTML = `
+      <img src="${item.img}" alt="NFT">
+
+      ${
+        deleteMode
+        ? `<input type="checkbox"
+             class="bulk-checkbox"
+             data-id="${item.id}"
+             style="
+               position:absolute;
+               top:12px;
+               right:12px;
+               width:22px;
+               height:22px;
+               z-index:50;
+               cursor:pointer;
+             ">`
+        : ""
       }
+    `;
 
-      data.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "nft-card";
-        card.innerHTML = `<img src="${item.img}" alt="NFT">`;
+    // IMAGE PREVIEW
+    card.querySelector("img").onclick = () => {
 
-        if(isLoggedIn){
-          const delBtn = document.createElement("button");
-          delBtn.className = "delete-btn";
-          delBtn.innerText = "DELETE";
-          delBtn.onclick = () => deleteNFT(item.id);
-          card.appendChild(delBtn);
+      if(deleteMode) return;
+
+      document.getElementById("modalImage").src = item.img;
+      document.getElementById("previewModal").style.display = "flex";
+    };
+
+    // BULK SELECT
+    if(deleteMode){
+
+      const checkbox = card.querySelector(".bulk-checkbox");
+
+      checkbox.addEventListener("change", function(){
+
+        if(this.checked){
+
+          selectedNFTs.push({
+            id: item.id,
+            img: item.img
+          });
+
+        }else{
+
+          selectedNFTs = selectedNFTs.filter(
+            nft => nft.id !== item.id
+          );
         }
-
-        card.querySelector("img").onclick = () => {
-          document.getElementById("modalImage").src = item.img;
-          document.getElementById("previewModal").style.display = "flex";
-        };
-        container.appendChild(card);
       });
     }
 
-    // ====================== DELETE FROM BOTH DB + STORAGE ======================
-    async function deleteNFT(id){
-      if(!confirm("Delete this NFT permanently from everywhere?")) return;
-
-      try {
-        // Pehle database se image URL le lo
-        const { data: nft } = await supabaseClient
-          .from("nfts_data")
-          .select("img")
-          .eq("id", id)
-          .single();
-
-        if(nft && nft.img){
-          // Storage se delete
-          const imagePath = nft.img.split("/nfts/")[1];
-          if(imagePath){
-            await supabaseClient.storage.from("nfts").remove([imagePath]);
-          }
-        }
-
-        // Database se delete
-        await supabaseClient.from("nfts_data").delete().eq("id", id);
-
-        alert("NFT Deleted Successfully");
-        await loadNFTs();
-      } catch(err){
-        console.error(err);
-        alert("Delete Failed");
-      }
-    }
-
+    container.appendChild(card);
+  });
+}
+   
     // ====================== UPLOAD WITH PROGRESS ======================
     async function uploadNFTs(){
       const files = document.getElementById("imageUpload").files;
@@ -683,17 +696,67 @@ document.body.classList.remove("delete-mode");
     document.getElementById("deleteModeBtn")
 .addEventListener("click", async () => {
 
-  deleteMode = !deleteMode;
+  // ENTER DELETE MODE
+  if(!deleteMode){
 
-  if(deleteMode){
+    deleteMode = true;
+    selectedNFTs = [];
 
     document.body.classList.add("delete-mode");
 
-  }else{
+    document.getElementById("deleteModeBtn").innerText = "DELETE SELECTED";
 
-    document.body.classList.remove("delete-mode");
+    await loadNFTs();
+
+    return;
   }
 
+  // DELETE SELECTED
+  if(selectedNFTs.length === 0){
+    alert("No NFTs Selected");
+    return;
+  }
+
+  if(!confirm(`Delete ${selectedNFTs.length} NFT(s)?`)) return;
+
+  try{
+
+    for(const nft of selectedNFTs){
+
+      // STORAGE DELETE
+      const imagePath = nft.img.split("/nfts/")[1];
+
+      if(imagePath){
+        await supabaseClient
+          .storage
+          .from("nfts")
+          .remove([imagePath]);
+      }
+
+      // DB DELETE
+      await supabaseClient
+        .from("nfts_data")
+        .delete()
+        .eq("id", nft.id);
+    }
+
+    alert("Selected NFTs Deleted");
+
+    deleteMode = false;
+    selectedNFTs = [];
+
+    document.body.classList.remove("delete-mode");
+
+    document.getElementById("deleteModeBtn").innerText = "🗑️";
+
+    await loadNFTs();
+
+  }catch(err){
+
+    console.log(err);
+    alert("Delete Failed");
+  }
+});
   await loadNFTs();
 });
     loadNFTs();
