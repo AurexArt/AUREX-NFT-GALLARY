@@ -751,13 +751,15 @@ document.body.classList.remove("delete-mode");
 
     await loadNFTs();
 
-  }catch(err){
+    }catch(err){
 
     console.log(err);
     alert("Delete Failed");
   }
 
-    loadNFTs();
-  </script>
+});
+
+loadNFTs();
+</script>
 </body>
 </html>
