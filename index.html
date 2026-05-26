@@ -654,45 +654,6 @@ deleteMode = false;
 
 document.body.classList.remove("delete-mode");
 
-document.getElementById("selectAllBtn")
-.addEventListener("click", () => {
-
-  if(!deleteMode){
-    alert("Enable Delete Mode First");
-    return;
-  }
-
-  selectedNFTs = [];
-
-  const checkboxes =
-    document.querySelectorAll(".bulk-checkbox");
-
-  checkboxes.forEach(box => {
-
-    box.checked = true;
-
-    const id = Number(box.dataset.id);
-
-    let allNFTs = [
-      ...relicsData,
-      ...totemsSPECIALData,
-      ...totemsLegendaryData
-    ];
-
-    const nft = allNFTs.find(
-      item => item.id === id
-    );
-
-    if(nft){
-      selectedNFTs.push({
-        id: nft.id,
-        img: nft.img
-      });
-    }
-  });
-
-  alert("All NFTs Selected");
-});
 
         loadNFTs();
         alert("Logged Out");
@@ -704,7 +665,7 @@ document.getElementById("selectAllBtn")
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
         document.getElementById("deleteModeBtn").style.display = "block";
-        document.getElementById("selectAllBtn").style.display = "block";
+        
         loadNFTs();
         alert("Login Successful");
       } else alert("Wrong Secret Word");
@@ -748,22 +709,87 @@ document.getElementById("selectAllBtn")
     });
 
     document.getElementById("legendaryBtn").addEventListener("click", () => {
-      document.getElementById("legendaryBtn").classList.add("active");
-      document.getElementById("SPECIALBtn").classList.remove("active");
-      renderGallery("totems-gallery", totemsLegendaryData);
-    });
-    document.getElementById("deleteModeBtn")
+  document.getElementById("legendaryBtn").classList.add("active");
+  document.getElementById("SPECIALBtn").classList.remove("active");
+  renderGallery("totems-gallery", totemsLegendaryData);
+});
+
+
+
+// ================= SELECT ALL =================
+
+document.getElementById("selectAllBtn")
+.addEventListener("click", () => {
+
+  if(!deleteMode) return;
+
+  selectedNFTs = [];
+
+  const checkboxes =
+    document.querySelectorAll(".bulk-checkbox");
+
+  checkboxes.forEach(box => {
+
+    box.checked = true;
+
+    const id = Number(box.dataset.id);
+
+    let currentNFTs = [];
+
+    // RELICS SECTION
+    if(
+      document.getElementById("relics-section")
+      .classList.contains("active")
+    ){
+      currentNFTs = relicsData;
+    }
+
+    // TOTEMS SPECIAL
+    else if(
+      document.getElementById("SPECIALBtn")
+      .classList.contains("active")
+    ){
+      currentNFTs = totemsSPECIALData;
+    }
+
+    // TOTEMS LEGENDARY
+    else{
+      currentNFTs = totemsLegendaryData;
+    }
+
+    const nft = currentNFTs.find(
+      item => item.id === id
+
+    );
+
+    if(nft){
+
+      selectedNFTs.push({
+        id: nft.id,
+        img: nft.img
+      });
+    }
+  });
+
+  alert("All NFTs Selected");
+});
+document.getElementById("deleteModeBtn")
 .addEventListener("click", async () => {
 
   // ENTER DELETE MODE
   if(!deleteMode){
 
     deleteMode = true;
+
     selectedNFTs = [];
 
     document.body.classList.add("delete-mode");
 
-    document.getElementById("deleteModeBtn").innerText = "DELETE SELECTED";
+    document.getElementById("deleteModeBtn")
+      .innerText = "DELETE SELECTED";
+
+    document.getElementById("selectAllBtn")
+      .style.display = "block";
 
     await loadNFTs();
 
@@ -782,17 +808,17 @@ document.getElementById("selectAllBtn")
 
     for(const nft of selectedNFTs){
 
-      // STORAGE DELETE
-      const imagePath = nft.img.split("/nfts/")[1];
+      const imagePath =
+        nft.img.split("/nfts/")[1];
 
       if(imagePath){
+
         await supabaseClient
           .storage
           .from("nfts")
           .remove([imagePath]);
       }
 
-      // DB DELETE
       await supabaseClient
         .from("nfts_data")
         .delete()
@@ -802,20 +828,25 @@ document.getElementById("selectAllBtn")
     alert("Selected NFTs Deleted");
 
     deleteMode = false;
+
     selectedNFTs = [];
 
     document.body.classList.remove("delete-mode");
 
-    document.getElementById("deleteModeBtn").innerText = "🗑️";
+    document.getElementById("deleteModeBtn")
+      .innerText = "🗑️";
+
+    document.getElementById("selectAllBtn")
+      .style.display = "none";
 
     await loadNFTs();
 
-    }catch(err){
+  }catch(err){
 
     console.log(err);
+
     alert("Delete Failed");
   }
-
 });
 
 loadNFTs();
