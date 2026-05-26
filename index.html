@@ -144,6 +144,18 @@
   border-color:#ff3300;
   background:transparent;
 }
+
+#selectAllBtn{
+  border-color:#00cc66;
+  color:#00cc66;
+  font-size:16px;
+  padding:10px 18px;
+}
+
+#selectAllBtn:hover{
+  background:#00cc66;
+  color:white;
+}
     .gallery{
       width:100%;
       padding:15px;
@@ -328,6 +340,10 @@
 
     <button id="deleteModeBtn" style="display:none;">
       🗑️
+    </button>
+    
+    <button id="selectAllBtn" style="display:none;">
+  SELECT ALL
     </button>
 
   </div>
@@ -632,10 +648,52 @@
         document.getElementById("loginBtn").innerText = "LOGIN";
         document.getElementById("uploadBtn").style.display = "none";
         document.getElementById("deleteModeBtn").style.display = "none";
+        document.getElementById("selectAllBtn").style.display = "none";
 
 deleteMode = false;
 
 document.body.classList.remove("delete-mode");
+
+document.getElementById("selectAllBtn")
+.addEventListener("click", () => {
+
+  if(!deleteMode){
+    alert("Enable Delete Mode First");
+    return;
+  }
+
+  selectedNFTs = [];
+
+  const checkboxes =
+    document.querySelectorAll(".bulk-checkbox");
+
+  checkboxes.forEach(box => {
+
+    box.checked = true;
+
+    const id = Number(box.dataset.id);
+
+    let allNFTs = [
+      ...relicsData,
+      ...totemsSPECIALData,
+      ...totemsLegendaryData
+    ];
+
+    const nft = allNFTs.find(
+      item => item.id === id
+    );
+
+    if(nft){
+      selectedNFTs.push({
+        id: nft.id,
+        img: nft.img
+      });
+    }
+  });
+
+  alert("All NFTs Selected");
+});
+
         loadNFTs();
         alert("Logged Out");
         return;
@@ -646,6 +704,7 @@ document.body.classList.remove("delete-mode");
         document.getElementById("loginBtn").innerText = "LOGOUT";
         document.getElementById("uploadBtn").style.display = "block";
         document.getElementById("deleteModeBtn").style.display = "block";
+        document.getElementById("selectAllBtn").style.display = "block";
         loadNFTs();
         alert("Login Successful");
       } else alert("Wrong Secret Word");
